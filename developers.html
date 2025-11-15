@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Команда проекта | Metro 2033</title>
+  <link rel="icon" href="images/dev_icon.png" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <!-- Единый стиль Metro 2033 -->
+  <link rel="stylesheet" href="metro2033-unified.css">
+  <!-- Скрипт загрузочной заставки -->
+  <script src="metro2033-loader.js" defer></script>
+  <!-- Скрипт курсора -->
+  <script src="metro2033-cursor.js" defer></script>
+  <!-- Скрипт эффектов -->
+  <script src="metro2033-effects.js" defer></script>
+  <!-- Скрипт авторизации -->
+  <script src="auth-system.js" defer></script>
+  <!-- Скрипт модального окна пользователя -->
+  <script src="user-modal.js" defer></script>
+  <style>
+    /* Общие стили */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Courier New', monospace;
+    }
+
+    body {
+      background-color: #0a0c13;
+      color: #ccc;
+      background-image: url('images/Dev.gif');
+      background-size: cover;
+      background-attachment: fixed;
+      position: relative;
+    }
+
+    /* Туман по краям */
+    .fog-left, .fog-right {
+      position: fixed;
+      top: 0;
+      width: 15%;
+      height: 100%;
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.8), transparent);
+      z-index: 5;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .fog-left {
+      left: 0;
+    }
+
+    .fog-right {
+      right: 0;
+      transform: rotateY(180deg);
+    }
+
+    /* Старые стили загрузочного экрана удалены - используется metro2033-loader.js */
+
+    /* Шапка */
+    header {
+      display: flex;
+      align-items: center;
+      padding: 1.8rem 2.5rem;
+      background: rgba(10, 15, 25, 0.98);
+      backdrop-filter: blur(8px);
+      border-bottom: 2px solid #333;
+      gap: 2.5rem;
+      z-index: 10;
+      position: relative;
+    }
+
+    .logo {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: url('images/logo.png') no-repeat center;
+      background-size: contain;
+      border: 4px solid #e74c3c;
+      box-shadow: 0 0 15px rgba(231, 76, 60, 0.6);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.8rem;
+    }
+
+    .nav-link {
+      color: #ccc;
+      text-decoration: none;
+      padding: 1rem 1.6rem;
+      background: rgba(40, 40, 50, 0.8);
+      border-radius: 8px;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+    }
+
+    .nav-link:hover {
+      background: rgba(60, 60, 70, 0.95);
+      color: white;
+      transform: translateY(-2px);
+      border-left: 4px solid #3498db;
+    }
+
+    .social-icons {
+      display: flex;
+      gap: 1.8rem;
+      margin-left: auto;
+    }
+
+    .social-icon {
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(40, 40, 50, 0.9);
+      border-radius: 50%;
+      color: white;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 1.3rem;
+      border: 2px solid #555;
+    }
+
+    .social-icon:hover {
+      background: #e74c3c;
+      transform: scale(1.25) rotate(10deg);
+      box-shadow: 0 0 12px rgba(231, 76, 60, 0.7);
+    }
+
+    /* Основной контент */
+    main {
+      max-width: 1200px;
+      margin: 6rem auto;
+      padding: 0 1rem;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      color: #3498db;
+      font-size: 2.8rem;
+      margin-bottom: 3rem;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Сектор слайдов */
+    .slides-container {
+      position: relative;
+      width: 100%;
+      height: 70vh;
+      min-height: 500px;
+      background: url('images/background.mp4') center/cover no-repeat;
+      background-color: rgba(10, 15, 20, 0.8);
+      border: 3px solid #f39c12;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 
+        0 0 20px rgba(243, 156, 18, 0.4),
+        inset 0 0 20px rgba(0, 0, 0, 0.8);
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .border-glow {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      right: 2px;
+      bottom: 2px;
+      border: 2px solid #f39c12;
+      border-radius: 14px;
+      pointer-events: none;
+      animation: borderPulse 3s infinite alternate;
+    }
+
+    @keyframes borderPulse {
+      0% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    /* Глитч-эффект */
+    .glitch-effect {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(255, 0, 0, 0.1),
+        rgba(255, 0, 0, 0.1) 2px,
+        transparent 2px,
+        transparent 4px
+      );
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Слайды */
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .dev-card {
+      background: rgba(20, 25, 35, 0.92);
+      border: 2px solid #333;
+      border-radius: 16px;
+      padding: 3.5rem;
+      max-width: 780px;
+      min-height: 450px;
+      color: #eee;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .dev-avatar {
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: #222 center/cover;
+      border: 5px solid #444;
+      margin-bottom: 1.8rem;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+    }
+
+    .dev-name {
+      color: #a0d860;
+      font-size: 2.6rem;
+      margin-bottom: 0.6rem;
+      text-shadow: 0 0 6px rgba(0, 0, 0, 0.7);
+    }
+
+    .dev-role {
+      color: #3498db;
+      font-size: 1.4rem;
+      margin-bottom: 1.6rem;
+    }
+
+    .dev-description {
+      color: #ddd;
+      font-size: 1.2rem;
+      line-height: 1.6;
+      max-width: 650px;
+    }
+
+    /* Кружки */
+    .dots {
+      display: flex;
+      justify-content: center;
+      gap: 1.4rem;
+      margin-top: 3.5rem;
+      flex-wrap: wrap;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: rgba(100, 100, 100, 0.6);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .dot:hover {
+      transform: scale(1.2);
+      background: #ccc;
+    }
+
+    .dot.active {
+      background: #e74c3c;
+      transform: scale(1.5);
+      box-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
+    }
+
+    /* Футер */
+    footer {
+      margin-top: 7rem;
+      padding: 3rem;
+      background: rgba(10, 15, 25, 0.98);
+      color: #aaa;
+      font-size: 1.2rem;
+      border-top: 2px solid #333;
+      border-radius: 12px;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 3rem;
+      box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .footer-cols {
+      display: flex;
+      justify-content: space-between;
+      max-width: 1000px;
+      margin: 0 auto;
+      gap: 1.5rem;
+    }
+
+    .footer-col {
+      flex: 1;
+      padding: 1rem;
+      border-right: 1px solid #444;
+      text-align: center;
+    }
+
+    .footer-col:last-child {
+      border-right: none;
+    }
+
+    .footer-col p {
+      margin: 0.5rem 0;
+    }
+
+    .copyright {
+      color: #3498db;
+      font-weight: bold;
+    }
+
+    .footer-year-block {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      min-height: 120px;
+    }
+
+    .year {
+      color: #e74c3c;
+      font-size: 5rem;
+      font-weight: bold;
+      text-shadow: 0 0 20px rgba(231, 76, 60, 0.8);
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+
+    .year-sub {
+      color: #aaa;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Мобильная адаптация */
+    @media (max-width: 768px) {
+      .fog-left, .fog-right {
+        width: 20%;
+      }
+
+      .slides-container {
+        height: 60vh;
+      }
+
+      .dev-card {
+        padding: 2rem 1.5rem;
+      }
+
+      .dev-avatar {
+        width: 200px;
+        height: 200px;
+      }
+
+      .dev-name {
+        font-size: 2.2rem;
+      }
+
+      .dev-description {
+        font-size: 1.1rem;
+      }
+
+      .dots {
+        gap: 1rem;
+      }
+
+      .footer-cols {
+        flex-direction: column;
+      }
+
+      .footer-col {
+        border-right: none;
+        border-bottom: 1px solid #444;
+      }
+
+      .footer-col:last-child {
+        border-bottom: none;
+      }
+
+      .year {
+        font-size: 3.5rem;
+      }
+
+      footer {
+        font-size: 1rem;
+        padding: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Туман -->
+  <div class="fog-left"></div>
+  <div class="fog-right"></div>
+
+  <!-- Основной контент -->
+
+    <!-- Шапка -->
+    <header>
+      <div class="logo"></div>
+      <nav class="nav-links">
+        <a href="projects.html" class="nav-link">Проекты</a>
+        <a href="about.html" class="nav-link">О нас</a>
+        <a href="rules.html" class="nav-link">Правила</a>
+        <a href="support.html" class="nav-link">Поддержка</a>
+        <a href="index.html" class="nav-link">На главную</a>
+      </nav>
+      <div class="social-icons">
+        <a href="#" class="social-icon"><i class="fab fa-discord"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-vk"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+      </div>
+    </header>
+
+    <!-- Основной контент -->
+    <main class="metro-container">
+      <h1 class="metro-title metro-glow-text metro-slide-in-right" style="font-size: 2.8rem;">КОМАНДА РАЗРАБОТЧИКОВ</h1>
+
+      <div class="slides-container metro-border-glow metro-slide-in-left" style="margin-top: 2rem; position: relative;">
+        <div class="border-glow"></div>
+        <div class="glitch-effect" id="glitch" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: repeating-linear-gradient(0deg, rgba(255, 0, 0, 0.1), rgba(255, 0, 0, 0.1) 2px, transparent 2px, transparent 4px); opacity: 0; pointer-events: none; z-index: 10;"></div>
+
+        <!-- Слайд 1 -->
+        <div class="slide active">
+          <div class="dev-card metro-border-glow" style="border: 3px solid var(--metro-terminal-green); box-shadow: 0 0 25px rgba(0, 255, 0, 0.4);">
+            <div class="dev-avatar metro-pulse" style="background-image: url('images/9l3bl4.png'); border-color: var(--metro-terminal-green);"></div>
+            <h2 class="dev-name metro-glow-text" style="color: var(--metro-terminal-green);">alexey_sokolov188</h2>
+            <p class="dev-role" style="color: var(--metro-terminal-cyan);">Основатель проекта</p>
+            <p class="dev-description">Заложил основу проекта, управляет стратегией и будущим проекта.</p>
+          </div>
+        </div>
+
+        <!-- Слайд 2 -->
+        <div class="slide">
+          <div class="dev-card metro-border-glow" style="border: 3px solid var(--metro-terminal-green); box-shadow: 0 0 25px rgba(0, 255, 0, 0.4);">
+            <div class="dev-avatar metro-pulse" style="background-image: url('images/hanza.png'); border-color: var(--metro-terminal-green);"></div>
+            <h2 class="dev-name metro-glow-text" style="color: var(--metro-terminal-green);">egortyfgs_5999</h2>
+            <p class="dev-role" style="color: var(--metro-terminal-cyan);">Заместитель основателя</p>
+            <p class="dev-description">Правая рука основателя. Занимается администрированием РП процесса. По совместительству - Долбаёб.</p>
+          </div>
+        </div>
+
+        <!-- Слайд 3 -->
+        <div class="slide">
+          <div class="dev-card metro-border-glow" style="border: 3px solid var(--metro-terminal-green); box-shadow: 0 0 25px rgba(0, 255, 0, 0.4);">
+            <div class="dev-avatar metro-pulse" style="background-image: url('images/Ussr.png'); border-color: var(--metro-terminal-green);"></div>
+            <h2 class="dev-name metro-glow-text" style="color: var(--metro-terminal-green);">sephiroth3246</h2>
+            <p class="dev-role" style="color: var(--metro-terminal-cyan);">Помощник основателя</p>
+            <p class="dev-description">Балду пинает, катку выигрывает. По совместительству технический администратор и куратор РП процесса. </p>
+          </div>
+        </div>
+
+        <!-- Слайд 4 -->
+        <div class="slide">
+          <div class="dev-card metro-border-glow" style="border: 3px solid var(--metro-terminal-green); box-shadow: 0 0 25px rgba(0, 255, 0, 0.4);">
+            <div class="dev-avatar metro-pulse" style="background-image: url('images/Polis.png'); border-color: var(--metro-terminal-green);"></div>
+            <h2 class="dev-name metro-glow-text" style="color: var(--metro-terminal-green);">vytma</h2>
+            <p class="dev-role" style="color: var(--metro-terminal-cyan);">Главный администратор</p>
+            <p class="dev-description">Следит за сервером и ниже стоящими должностями.</p>
+          </div>
+        </div>
+
+        <!-- Слайд 5 -->
+        <div class="slide">
+          <div class="dev-card metro-border-glow" style="border: 3px solid var(--metro-terminal-green); box-shadow: 0 0 25px rgba(0, 255, 0, 0.4);">
+            <div class="dev-avatar metro-pulse" style="background-image: url('images/Trock.png'); border-color: var(--metro-terminal-green);"></div>
+            <h2 class="dev-name metro-glow-text" style="color: var(--metro-terminal-green);">kyk33</h2>
+            <p class="dev-role" style="color: var(--metro-terminal-cyan);">Заместитель главного администратора</p>
+            <p class="dev-description">Замещает Гл. Админа.</p>
+          </div>
+        </div>
+
+        <!-- Слайд 6 -->
+        <div class="slide">
+          <div class="dev-card metro-border-glow" style="border: 3px solid var(--metro-terminal-green); box-shadow: 0 0 25px rgba(0, 255, 0, 0.4);">
+            <div class="dev-avatar metro-pulse" style="background-image: url('images/Китайка.png'); border-color: var(--metro-terminal-green);"></div>
+            <h2 class="dev-name metro-glow-text" style="color: var(--metro-terminal-green);">zverobob112</h2>
+            <p class="dev-role" style="color: var(--metro-terminal-cyan);">Разработчик</p>
+            <p class="dev-description">Разрабатывает бота и сайт проекта. Отвечает за обновление, поддержку и содеражание.</p>
+          </div>
+        </div>
+
+        <!-- Слайд 7 -->
+        <div class="slide">
+          <div class="dev-card metro-border-glow" style="border: 3px solid var(--metro-terminal-green); box-shadow: 0 0 25px rgba(0, 255, 0, 0.4);">
+            <div class="dev-avatar metro-pulse" style="background-image: url('images/Nazi.png'); border-color: var(--metro-terminal-green);"></div>
+            <h2 class="dev-name metro-glow-text" style="color: var(--metro-terminal-green);">skeltx</h2>
+            <p class="dev-role" style="color: var(--metro-terminal-cyan);">Разработчик</p>
+            <p class="dev-description">Разрабатывает хуй знает что и работает медийкой.</p>
+          </div>
+        </div>
+
+        <!-- Слайд 8 -->
+        <div class="slide">
+          <div class="dev-card metro-border-glow" style="border: 3px solid var(--metro-terminal-green); box-shadow: 0 0 25px rgba(0, 255, 0, 0.4);">
+            <div class="dev-avatar metro-pulse" style="background-image: url('images/logo.png'); border-color: var(--metro-terminal-green);"></div>
+            <h2 class="dev-name metro-glow-text" style="color: var(--metro-terminal-green);">...</h2>
+            <p class="dev-role" style="color: var(--metro-terminal-cyan);">---</p>
+            <p class="dev-description">@_@</p>
+          </div>
+        </div>
+
+        <!-- Слайд 9 -->
+        <div class="slide">
+          <div class="dev-card metro-border-glow" style="border: 3px solid var(--metro-terminal-green); box-shadow: 0 0 25px rgba(0, 255, 0, 0.4);">
+            <div class="dev-avatar metro-pulse" style="background-image: url('images/logo.png'); border-color: var(--metro-terminal-green);"></div>
+            <h2 class="dev-name metro-glow-text" style="color: var(--metro-terminal-green);">...</h2>
+            <p class="dev-role" style="color: var(--metro-terminal-cyan);">---</p>
+            <p class="dev-description">@_@</p>
+          </div>
+        </div>
+
+        <!-- Слайд 10 -->
+        <div class="slide">
+          <div class="dev-card metro-border-glow" style="border: 3px solid var(--metro-terminal-green); box-shadow: 0 0 25px rgba(0, 255, 0, 0.4);">
+            <div class="dev-avatar metro-pulse" style="background-image: url('images/logo.png'); border-color: var(--metro-terminal-green);"></div>
+            <h2 class="dev-name metro-glow-text" style="color: var(--metro-terminal-green);">...</h2>
+            <p class="dev-role" style="color: var(--metro-terminal-cyan);">---</p>
+            <p class="dev-description">@_@</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="dots" id="dots">
+        <span class="dot active" data-index="0"></span>
+        <span class="dot" data-index="1"></span>
+        <span class="dot" data-index="2"></span>
+        <span class="dot" data-index="3"></span>
+        <span class="dot" data-index="4"></span>
+        <span class="dot" data-index="5"></span>
+        <span class="dot" data-index="6"></span>
+        <span class="dot" data-index="7"></span>
+        <span class="dot" data-index="8"></span>
+        <span class="dot" data-index="9"></span>
+      </div>
+    </main>
+
+    <!-- Футер -->
+    <footer class="metro-footer">
+      <div class="metro-footer-content">
+        <div class="footer-left">
+          <p>&copy; <span class="metro-glow-text" style="color: var(--metro-terminal-cyan);">STORM Studio</span> 2025</p>
+          <p>Все права защищены. Сделано в бункере.</p>
+        </div>
+        <div class="footer-right">
+          <p>Не связано с Mojang AB или Microsoft.</p>
+          <p>Проект основан на вселенной Metro 2033 и полностью перенесён в Minecraft.</p>
+        </div>
+      </div>
+      <div class="metro-footer-year">2033</div>
+    </footer>
+
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Глитч и переключение слайдов
+    const dots = document.querySelectorAll('.dot');
+    const slides = document.querySelectorAll('.slide');
+
+    function showSlide(index) {
+      // Глитч эффект (если элемент существует)
+      const glitch = document.querySelector('.glitch-effect');
+      if (glitch) {
+        glitch.style.opacity = '0.8';
+        setTimeout(() => {
+          glitch.style.opacity = '0';
+        }, 150);
+      }
+
+      // Скрыть все слайды
+      slides.forEach(slide => slide.classList.remove('active'));
+      dots.forEach(dot => dot.classList.remove('active'));
+
+      // Показать нужный
+      slides[index].classList.add('active');
+      dots[index].classList.add('active');
+    }
+
+    // Клик по кружкам
+    dots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        const index = parseInt(dot.getAttribute('data-index'));
+        showSlide(index);
+      });
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Проекты | Coldfire project</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <!-- Единый стиль Metro 2033 -->
+  <link rel="stylesheet" href="metro2033-unified.css">
+  <!-- Скрипт загрузочной заставки -->
+  <script src="metro2033-loader.js" defer></script>
+  <!-- Скрипт курсора -->
+  <script src="metro2033-cursor.js" defer></script>
+  <!-- Скрипт эффектов -->
+  <script src="metro2033-effects.js" defer></script>
+  <!-- Скрипт авторизации -->
+  <script src="auth-system.js" defer></script>
+  <!-- Скрипт модального окна пользователя -->
+  <script src="user-modal.js" defer></script>
+  <style>
+    /* Общие стили */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Courier New', monospace;
+    }
+
+    body {
+      background-color: #0a0a0a;
+      color: #0f2e5e;
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Старые стили загрузочного экрана удалены - используется metro2033-loader.js */
+
+    /* Фоновое видео */
+    video#bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+      opacity: 0.3;
+    }
+
+    /* Шапка */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 3rem;
+      background-color: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(5px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid #e74c3c;
+      box-shadow: 0 0 15px rgba(231, 76, 54, 0.5);
+    }
+
+    .logo {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: 4px solid #ffffff;
+      background: url('images/logo.png') no-repeat center;
+      background-size: cover;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .logo:hover {
+      transform: scale(1.1);
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .nav-button {
+      background: rgba(255, 255, 255, 0.1);
+      color: #e74c3c;
+      padding: 0.9rem 1.8rem;
+      border: 2px solid #e74c3c;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: bold;
+      font-size: 1.1rem;
+      text-align: center;
+      min-width: 120px;
+    }
+
+    .nav-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 0 20px rgba(231, 76, 54, 0.7);
+    }
+
+    .social-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .social-link {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid #e74c3c;
+      font-size: 1.2rem;
+    }
+
+    .social-link:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.3);
+    }
+
+    /* Заголовок "Команда разработчиков" */
+    .section-header {
+      text-align: center;
+      padding: 3rem 1rem 2rem;
+      z-index: 2;
+    }
+
+    .section-title {
+      font-size: 3rem;
+      color: #00ffff;
+      text-shadow: 0 0 15px #00ffff;
+      letter-spacing: 3px;
+      line-height: 1.2;
+      position: relative;
+      display: inline-block;
+      margin: 0 auto;
+      padding: 0.7rem 2rem;
+      background: rgba(0, 0, 0, 0.7);
+      border: 3px solid #e74c3c;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(231, 76, 54, 0.5);
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #e74c3c, transparent);
+    }
+
+    /* Основной контент */
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 0;
+      min-height: calc(100vh - 300px);
+      position: relative;
+    }
+
+    /* Блок для карусели */
+    .carousel-wrapper {
+      width: 100%;
+      max-width: 1100px;
+      height: 490px;
+      margin: 2rem auto;
+      position: relative;
+      border: 4px solid #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.9);
+      box-shadow: 0 0 20px rgba(231, 76, 54, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .carousel-container {
+      perspective: 1200px;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #carousel {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.8s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .card {
+      position: absolute;
+      width: 320px;
+      height: 420px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 4px solid #e74c3c;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #00ff00;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: transform 0.8s ease, opacity 0.8s ease;
+      transform-style: preserve-3d;
+      user-select: none;
+      box-shadow: 0 0 20px rgba(231, 76, 54, 0.5);
+      opacity: 1;
+    }
+
+    .card h2 {
+      margin-bottom: 1.2rem;
+      font-size: 1.6rem;
+      color: #00ff00;
+      text-shadow: 0 0 6px #00ff00;
+    }
+
+    .card p {
+      text-align: center;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+      color: #fff;
+      max-width: 260px;
+    }
+
+    .card img {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      margin-bottom: 1.5rem;
+      border: 4px solid #e74c3c;
+      background: #000;
+    }
+
+    /* Кнопки навигации */
+    .nav-arrows {
+      display: flex;
+      gap: 2rem;
+      margin-top: 1rem;
+      justify-content: center;
+    }
+
+    .arrow-btn {
+      width: 60px;
+      height: 60px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid #e74c3c;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+      font-size: 1.5rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(231, 76, 54, 0.5);
+    }
+
+    .arrow-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+    }
+
+    /* Футер */
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: #ccc;
+      font-size: 0.9rem;
+      background-color: rgba(0, 0, 0, 0.8);
+      margin-top: 3rem;
+      position: relative;
+    }
+
+    footer::before {
+      content: '';
+      display: block;
+      width: 80%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #e74c3c, transparent);
+      margin: 0 auto 1rem;
+      box-shadow: 0 0 5px #e74c3c;
+    }
+
+    footer::after {
+      content: '█';
+      display: inline-block;
+      animation: blink 1.2s infinite;
+      color: #00ff00;
+      margin-left: 5px;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    footer p {
+      margin: 0.5rem 0;
+      color: #aaa;
+      font-size: 0.85rem;
+    }
+
+    footer .copyright {
+      color: #00ffff;
+      font-weight: bold;
+      text-shadow: 0 0 5px #00ffff;
+    }
+  </style>
+</head>
+<body>
+  <!-- Фоновое видео -->
+  <video id="bg-video" autoplay muted loop>
+    <source src="images/background.mp4" type="video/mp4">
+    Ваш браузер не поддерживает видео.
+  </video>
+
+  <!-- Шапка -->
+  <header>
+    <div class="logo" onclick="window.location.href='/'"></div>
+    <nav class="nav-buttons">
+      <button class="nav-button" onclick="window.location.href='about.html'">О нас</button>
+      <button class="nav-button" onclick="window.location.href='rules.html'">Правила</button>
+      <button class="nav-button" onclick="window.location.href='support.html'">Поддержка</button>
+      <button class="nav-button" onclick="window.location.href='index.html'">На главную</button>
+    </nav>
+    <div class="social-links">
+      <a href="https://discord.gg" target="_blank" class="social-link">
+        <i class="fab fa-discord"></i>
+      </a>
+      <a href="https://vk.com" target="_blank" class="social-link">
+        <i class="fab fa-vk"></i>
+      </a>
+      <a href="https://youtube.com" target="_blank" class="social-link">
+        <i class="fab fa-youtube"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Заголовок -->
+  <div class="section-header metro-container" style="margin-top: 2rem; padding: 3rem 1rem;">
+    <h1 class="metro-title metro-glow-text metro-slide-in-right">НАШИ ПРОЕКТЫ</h1>
+  </div>
+
+  <!-- Основной контент -->
+  <main>
+    <div class="carousel-wrapper metro-border-glow metro-slide-in-left" style="margin-top: 2rem;">
+      <div class="carousel-container">
+        <div id="carousel">
+          <div class="card" data-id="1">
+            <img src="images/2033.png" alt="Alexey" />
+            <h2>Метро 2033 РП</h2>
+            <p>Описание ещё не придумалось...</p>
+          </div>
+          <div class="card" data-id="2">
+            <img src="images/Zombie.png" alt="Dev2" />
+            <h2>Зомби сервер</h2>
+            <p>Описания нет. Ничем не могу помочь.</p>
+          </div>
+          <div class="card" data-id="3">
+            <img src="images/Stalker.png" alt="Dev3" />
+            <h2>Сталкер РП</h2>
+            <p>Описания нет, увы.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-arrows">
+      <button class="arrow-btn metro-shake" id="prev" style="border-color: var(--metro-accent-red); box-shadow: 0 0 15px rgba(231, 76, 60, 0.5);">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <button class="arrow-btn metro-shake" id="next" style="border-color: var(--metro-accent-red); box-shadow: 0 0 15px rgba(231, 76, 60, 0.5);">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </main>
+
+  <!-- Футер -->
+  <footer class="metro-footer">
+    <div class="metro-footer-content">
+      <div>
+        <p class="metro-glow-text" style="color: var(--metro-terminal-cyan);">&copy; 2025 Coldfire project</p>
+        <p>Все права защищены. Проект не связан с 4A Games.</p>
+        <p>Система работает в штатном режиме <span class="metro-glow-text" style="color: var(--metro-terminal-green);">█</span></p>
+      </div>
+    </div>
+    <div class="metro-footer-year">2033</div>
+  </footer>
+
+  <script>
+    // Инициализация карусели после загрузки страницы
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        initCarousel();
+      }, 3100); // После загрузки metro2033-loader
+    });
+
+    // 3D Карусель
+    function initCarousel() {
+      const carousel = document.getElementById('carousel');
+      const prevBtn = document.getElementById('prev');
+      const nextBtn = document.getElementById('next');
+
+      let currentIndex = 0;
+      const totalCards = 3;
+      const radius = 400;
+
+      function updateCarousel() {
+        const angle = 360 / totalCards;
+
+        document.querySelectorAll('.card').forEach((card, index) => {
+          const offset = (index - currentIndex + totalCards) % totalCards;
+          const theta = offset * angle;
+          const radians = theta * Math.PI / 180;
+
+          const x = radius * Math.sin(radians);
+          const z = radius * Math.cos(radians);
+          const rotateY = -theta;
+
+          let opacity = 1;
+          let scale = 1;
+          if (offset === 1 || offset === 2) {
+            opacity = offset === 1 ? 0.8 : 0.6;
+            scale = offset === 1 ? 0.9 : 0.75;
+          }
+
+          card.style.transform = `
+            translateX(${x}px)
+            translateZ(${z}px)
+            rotateY(${rotateY}deg)
+            scale(${scale})
+          `;
+          card.style.opacity = opacity;
+        });
+      }
+
+      nextBtn.addEventListener('click', () => {
+        currentIndex = (currentIndex + 1) % totalCards;
+        updateCarousel();
+      });
+
+      prevBtn.addEventListener('click', () => {
+        currentIndex = (currentIndex - 1 + totalCards) % totalCards;
+        updateCarousel();
+      });
+
+      updateCarousel();
+    }
+  </script>
+</body>
+</html>

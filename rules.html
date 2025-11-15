@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Правила — Coldfire Project</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <!-- Единый стиль Metro 2033 -->
+  <link rel="stylesheet" href="metro2033-unified.css">
+  <!-- Скрипт загрузочной заставки -->
+  <script src="metro2033-loader.js" defer></script>
+  <!-- Скрипт курсора -->
+  <script src="metro2033-cursor.js" defer></script>
+  <!-- Скрипт эффектов -->
+  <script src="metro2033-effects.js" defer></script>
+  <!-- Скрипт авторизации -->
+  <script src="auth-system.js" defer></script>
+  <!-- Скрипт модального окна пользователя -->
+  <script src="user-modal.js" defer></script>
+  <style>
+    /* === Общие стили === */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0c0c0c url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect width="400" height="400" fill="%230a0a0a"/><path d="M0 0L400 400M400 0L0 400" stroke="%231a1a1a" stroke-width="2" opacity="0.1"/></svg>') repeat;
+      color: #e0e0e0;
+      font-family: 'VT323', monospace;
+      line-height: 1.6;
+      overflow-x: hidden;
+      font-size: 20px;
+      position: relative;
+      cursor: none; /* Скрываем стандартный курсор */
+    }
+
+    /* Старые стили загрузочного экрана удалены - используется metro2033-loader.js */
+
+    /* === Кастомный курсор === */
+    .custom-cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 24px;
+      height: 24px;
+      pointer-events: none;
+      z-index: 99999;
+      transition: transform 0.1s ease-out;
+    }
+
+    .cursor-crosshair {
+      width: 100%;
+      height: 100%;
+      fill: none;
+      stroke: #ff6b35;
+      stroke-width: 1.5;
+      filter: drop-shadow(0 0 8px rgba(255, 107, 53, 0.8));
+    }
+
+    .cursor-click {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(255, 107, 53, 0.3);
+      pointer-events: none;
+      z-index: 99998;
+      transform: scale(0);
+      opacity: 0;
+    }
+
+    /* === Шапка === */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 60px;
+      background: linear-gradient(90deg, rgba(10, 10, 10, 0.9), rgba(20, 20, 20, 0.9));
+      border-bottom: 3px solid #ff6b35;
+      box-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
+      position: relative;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 36px;
+      font-weight: bold;
+      color: #ff6b35;
+      text-shadow: 0 0 15px rgba(255, 107, 53, 0.8), 0 0 30px rgba(255, 107, 53, 0.5);
+      letter-spacing: 2px;
+      animation: glow 2s infinite alternate;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 35px;
+    }
+
+    .nav-links a {
+      color: #ccc;
+      text-decoration: none;
+      font-size: 22px;
+      transition: all 0.4s ease;
+      position: relative;
+      padding: 8px 16px;
+      border-radius: 6px;
+      background: rgba(30, 30, 30, 0.5);
+      pointer-events: auto;
+      cursor: none !important; /* Убираем стандартный курсор */
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: #ff8866;
+      background: rgba(255, 107, 53, 0.2);
+      box-shadow: 0 0 15px rgba(255, 107, 53, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .socials {
+      display: flex;
+      gap: 18px;
+    }
+
+    .social-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(30, 30, 30, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.4s ease;
+      border: 1px solid rgba(255, 107, 53, 0.3);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      pointer-events: auto;
+      cursor: none !important; /* Убираем стандартный курсор */
+    }
+
+    .social-icon:hover {
+      background: #ff6b35;
+      transform: scale(1.1) rotate(5deg);
+      border-color: #ff6b35;
+      box-shadow: 0 0 20px rgba(255, 107, 53, 0.7);
+    }
+
+    .social-icon-new i {
+      font-size: 28px;
+      transition: color 0.3s;
+    }
+    .social-icon-new:hover i {
+      color: #000;
+    }
+
+    /* === Основной контент === */
+    main {
+      padding: 50px 100px;
+      max-width: 1300px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Защита от копирования */
+    .rules-container {
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+
+    h1 {
+      font-size: 40px;
+      color: #ff6b35;
+      margin-bottom: 30px;
+      text-shadow: 0 0 15px rgba(255, 107, 53, 0.6);
+      animation: titleGlow 3s infinite alternate;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    @keyframes titleGlow {
+      from { text-shadow: 0 0 15px rgba(255, 107, 53, 0.6); }
+      to { text-shadow: 0 0 25px rgba(255, 107, 53, 0.9); }
+    }
+
+    .rule-chapter {
+      background: rgba(30, 30, 30, 0.8);
+      border: 1px solid #444;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      cursor: none !important; /* Убираем стандартный курсор */
+      transition: all 0.4s ease;
+      position: relative;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5), 0 5px 20px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      pointer-events: auto;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+    }
+
+    .rule-chapter:hover {
+      background: rgba(40, 40, 40, 0.9);
+      transform: translateY(-3px);
+      box-shadow: inset 0 0 20px rgba(255, 107, 53, 0.2), 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .chapter-header {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ddd;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+      transition: background 0.3s;
+      pointer-events: auto;
+      position: relative;
+      z-index: 2;
+      cursor: none !important; /* Убираем стандартный курсор */
+    }
+
+    .chapter-header:hover {
+      background: rgba(50, 50, 50, 0.3);
+    }
+
+    .chapter-arrow {
+      font-size: 22px;
+      color: #aaa;
+      transition: transform 0.4s ease;
+    }
+
+    .chapter-content {
+      padding: 0;
+      background: rgba(20, 20, 20, 0.9);
+      border-top: 1px solid #444;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 5px 30px rgba(0, 0, 0, 0.4);
+      transform-origin: top;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55), padding 0.6s ease;
+    }
+
+    .chapter-content.open {
+      max-height: 1000px;
+      padding: 24px;
+    }
+
+    .rule-section {
+      background: rgba(40, 40, 40, 0.7);
+      border: 1px solid #555;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      padding: 18px;
+      transition: all 0.4s ease;
+      box-shadow: 0 3px 15px rgba(0, 0, 0, 0.3);
+      pointer-events: auto;
+      cursor: none !important; /* Убираем стандартный курсор */
+    }
+
+    .rule-section:hover {
+      background: rgba(50, 50, 50, 0.8);
+      transform: translateX(5px);
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .section-title {
+      font-size: 18px;
+      color: #fff;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: bold;
+    }
+
+    .section-title::before {
+      content: "•";
+      color: #ffcc00;
+      font-weight: bold;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+
+    .rule-item {
+      margin: 18px 0;
+      padding: 15px 20px;
+      background: rgba(60, 60, 60, 0.5);
+      border-left: 3px solid transparent;
+      transition: all 0.4s ease;
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+      pointer-events: auto;
+      opacity: 0;
+      transform: translateY(20px);
+      cursor: none !important; /* Убираем стандартный курсор */
+    }
+
+    .rule-item.show {
+      opacity: 1;
+      transform: translateY(0);
+      transition: all 0.5s ease-out;
+    }
+
+    .rule-item:hover {
+      border-left-color: #ff6b35;
+      background: rgba(70, 70, 70, 0.6);
+      transform: translateX(5px);
+      box-shadow: 0 3px 15px rgba(255, 107, 53, 0.2);
+    }
+
+    .item-title {
+      font-size: 16px;
+      color: #fff;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .item-desc {
+      color: #ccc;
+      margin-bottom: 8px;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .item-punishment {
+      color: #ff6b35;
+      font-weight: bold;
+      padding-left: 12px;
+      border-left: 3px solid #ff6b35;
+      font-style: italic;
+      animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    /* === Футер === */
+    footer {
+      background: linear-gradient(to bottom, #080808, #000);
+      padding: 50px 80px;
+      border-top: 2px solid #ff6b35;
+      color: #bbb;
+      font-family: 'VT323', monospace;
+      font-size: 14px;
+      position: relative;
+    }
+
+    footer::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(to right, transparent, #ff6b35, transparent);
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer-column h3 {
+      color: #ff6b35;
+      margin-bottom: 20px;
+      font-size: 20px;
+      text-shadow: 0 0 10px rgba(255, 107, 53, 0.6);
+      position: relative;
+      padding-bottom: 8px;
+    }
+
+    .footer-column h3::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 50px;
+      height: 2px;
+      background: #ff6b35;
+    }
+
+    .footer-column p, .footer-column a {
+      color: #aaa;
+      text-decoration: none;
+      display: block;
+      margin-bottom: 10px;
+      transition: all 0.3s;
+      pointer-events: auto;
+      cursor: none !important; /* Убираем стандартный курсор */
+    }
+
+    .footer-column a:hover {
+      color: #ffaa88;
+      text-shadow: 0 0 8px rgba(255, 170, 136, 0.6);
+      transform: translateX(5px);
+    }
+
+    /* === Пепел === */
+    .ash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .ash-point {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: #fff;
+      border-radius: 50%;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    /* Анимация для вкладок */
+    @keyframes flipIn {
+      0% {
+        transform: rotateX(-90deg);
+        opacity: 0;
+      }
+      100% {
+        transform: rotateX(0);
+        opacity: 1;
+      }
+    }
+
+    .chapter-content.flip {
+      animation: flipIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    
+    /* Стили для новых иконок соцсетей */
+    .social-icon-new {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(30, 30, 30, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.4s ease;
+      border: 2px solid #ff6b35;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      pointer-events: auto;
+      cursor: none !important;
+    }
+    
+    .social-icon-new:hover {
+      background: #ff6b35;
+      transform: scale(1.1) rotate(5deg);
+      border-color: #ff6b35;
+      box-shadow: 0 0 20px rgba(255, 107, 53, 0.7);
+    }
+    
+    .social-icon-new svg {
+      width: 24px;
+      height: 24px;
+      fill: white;
+      transition: fill 0.3s;
+    }
+    
+    .social-icon-new:hover svg {
+      fill: #000;
+    }
+  </style>
+</head>
+<body oncontextmenu="return false;">
+
+  <!-- Кастомный курсор остался только для обратной совместимости, используется metro2033-cursor.js -->
+  <div class="custom-cursor">
+    <svg viewBox="0 0 24 24" class="cursor-crosshair">
+      <circle cx="12" cy="12" r="10" stroke-dasharray="4,4" />
+      <line x1="12" y1="2" x2="12" y2="6" />
+      <line x1="12" y1="18" x2="12" y2="22" />
+      <line x1="2" y1="12" x2="6" y2="12" />
+      <line x1="18" y1="12" x2="22" y2="12" />
+    </svg>
+  </div>
+  <div class="cursor-click" id="cursorClick"></div>
+
+  <!-- Шапка -->
+  <header>
+    <div class="logo">COLDFIRE</div>
+    <div class="nav-links">
+      <a href="projects.html">Проекты</a>
+      <a href="about.html">О нас</a>
+      <a href="#" class="active">Правила</a>
+      <a href="support.html">Поддержка</a>
+      <a href="index.html">На главную</a>
+    </div>
+    <div class="socials">
+      <a href="https://discord.gg/42n9vkRX37" target="_blank" class="social-icon-new">
+        <i class="fa-brands fa-discord"></i>
+      </a>
+      <a href="https://t.me/coldfire2033" target="_blank" class="social-icon-new">
+        <i class="fa-brands fa-telegram"></i>
+      </a>
+      <a href="#" target="_blank" class="social-icon-new">
+        <i class="fa-brands fa-tiktok"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Основной контент -->
+  <main class="metro-container">
+    <div class="rules-container" id="rulesContainer">
+      <h1 class="metro-title metro-glow-text metro-slide-in-right" style="font-size: 3rem; margin-bottom: 3rem;">ПРАВИЛА ПРОЕКТА</h1>
+
+      <!-- Глава 1 -->
+      <div class="rule-chapter metro-slide-in-left metro-shake" data-chapter="1" style="border: 2px solid var(--metro-accent-orange);">
+        <div class="chapter-header">
+          <span>ТЕРМИНЫ И ИХ ОБОЗНАЧЕНИЯ</span>
+          <span class="chapter-arrow">›</span>
+        </div>
+        <div class="chapter-content">
+          <div class="rule-section">
+            <div class="section-title">Основные понятия</div>
+            <div class="rule-item">
+              <div class="item-title">Выживший</div>
+              <div class="item-desc">Любой игрок, прошедший регистрацию и получивший доступ к серверу.</div>
+              <div class="item-punishment">Наказание: Отказ в доступе до исправления</div>
+            </div>
+            <div class="rule-item">
+              <div class="item-title">Аномалия</div>
+              <div class="item-desc">Зона на карте, где разрешено ПвП и действуют особые механики.</div>
+              <div class="item-punishment">Наказание: Тюрьма за игнорирование зоны</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Глава 2 -->
+      <div class="rule-chapter metro-slide-in-right metro-shake" data-chapter="2" style="border: 2px solid var(--metro-accent-orange);">
+        <div class="chapter-header">
+          <span>ОСНОВНЫЕ ПОЛОЖЕНИЯ</span>
+          <span class="chapter-arrow">›</span>
+        </div>
+        <div class="chapter-content">
+          <div class="rule-section">
+            <div class="section-title">Обязательные правила</div>
+            <div class="rule-item">
+              <div class="item-title">Регистрация</div>
+              <div class="item-desc">Без регистрации — никакого доступа. Это не просто правило — это выживание.</div>
+              <div class="item-punishment">Наказание: Бан аккаунта</div>
+            </div>
+            <div class="rule-item">
+              <div class="item-title">Уважение</div>
+              <div class="item-desc">Никаких оскорблений, троллинга, дискриминации. Мы — одна команда выживших.</div>
+              <div class="item-punishment">Наказание: Предупреждение → Мут → Бан</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Глава 3 -->
+      <div class="rule-chapter metro-slide-in-left metro-shake" data-chapter="3" style="border: 2px solid var(--metro-accent-orange);">
+        <div class="chapter-header">
+          <span>ОБЩЕНИЕ В ЧАТЕ</span>
+          <span class="chapter-arrow">›</span>
+        </div>
+        <div class="chapter-content">
+          <div class="rule-section">
+            <div class="section-title">Правила чата</div>
+            <div class="rule-item">
+              <div class="item-title">Язык</div>
+              <div class="item-desc">Только русский язык. Английский допустим только в технических вопросах.</div>
+              <div class="item-punishment">Наказание: Мут на 1 час</div>
+            </div>
+            <div class="rule-item">
+              <div class="item-title">Спам</div>
+              <div class="item-desc">Много сообщений подряд, боты, одинаковые фразы — запрещены.</div>
+              <div class="item-punishment">Наказание: Мут на 30 минут</div>
+            </div>
+            <div class="rule-item">
+              <div class="item-title">NSFW</div>
+              <div class="item-desc">Графика, насилие, взрослый контент — строго запрещены.</div>
+              <div class="item-punishment">Наказание: Бан без предупреждения</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Глава 4 -->
+      <div class="rule-chapter metro-slide-in-right metro-shake" data-chapter="4" style="border: 2px solid var(--metro-accent-orange);">
+        <div class="chapter-header">
+          <span>ИГРОВОЙ ПРОЦЕСС</span>
+          <span class="chapter-arrow">›</span>
+        </div>
+        <div class="chapter-content">
+          <div class="rule-section">
+            <div class="section-title">Игровые механики</div>
+            <div class="rule-item">
+              <div class="item-title">Гриферство</div>
+              <div class="item-desc">Уничтожение чужих построек, кражи, поджоги — запрещены. Мы выживаем вместе.</div>
+              <div class="item-punishment">Наказание: Возврат ущерба + Бан на 3 дня</div>
+            </div>
+            <div class="rule-item">
+              <div class="item-title">ПвП</div>
+              <div class="item-desc">Разрешён только в зонах «Аномалия». В остальных — запрещён.</div>
+              <div class="item-punishment">Наказание: Тюрьма на 10 минут → Бан</div>
+            </div>
+            <div class="rule-item">
+              <div class="item-title">Читы</div>
+              <div class="item-desc">X-ray, fly, killaura — запрещены. Радиоактивный мозг не нужен.</div>
+              <div class="item-punishment">Наказание: Перманентный бан</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Глава 5 -->
+      <div class="rule-chapter metro-slide-in-left metro-shake" data-chapter="5" style="border: 2px solid var(--metro-accent-orange);">
+        <div class="chapter-header">
+          <span>ВЗАИМОДЕЙСТВИЕ С КОМАНДОЙ ПРОЕКТА</span>
+          <span class="chapter-arrow">›</span>
+        </div>
+        <div class="chapter-content">
+          <div class="rule-section">
+            <div class="section-title">Сотрудничество</div>
+            <div class="rule-item">
+              <div class="item-title">Уважение</div>
+              <div class="item-desc">Неуважительные высказывания, оскорбления, провокации — недопустимы.</div>
+              <div class="item-punishment">Наказание: Бан на 7 дней</div>
+            </div>
+            <div class="rule-item">
+              <div class="item-title">Поддержка</div>
+              <div class="item-desc">Только через официальные формы. Личные сообщения — только в крайних случаях.</div>
+              <div class="item-punishment">Наказание: Игнор + предупреждение</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Глава 6 -->
+      <div class="rule-chapter metro-slide-in-right metro-shake" data-chapter="6" style="border: 2px solid var(--metro-accent-orange);">
+        <div class="chapter-header">
+          <span>ПРАВИЛА ДЛЯ СОСТАВА МОДЕРАЦИИ</span>
+          <span class="chapter-arrow">›</span>
+        </div>
+        <div class="chapter-content">
+          <div class="rule-section">
+            <div class="section-title">Обязанности модераторов</div>
+            <div class="rule-item">
+              <div class="item-title">Объективность</div>
+              <div class="item-desc">Наказания должны быть объективными, без эмоций и предвзятости.</div>
+              <div class="item-punishment">Наказание: Снятие с должности</div>
+            </div>
+            <div class="rule-item">
+              <div class="item-title">Прозрачность</div>
+              <div class="item-desc">Все решения должны быть опубликованы в логах и доступны для проверки.</div>
+              <div class="item-punishment">Наказание: Предупреждение → Снятие</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Глава 7 -->
+      <div class="rule-chapter metro-slide-in-left metro-shake" data-chapter="7" style="border: 2px solid var(--metro-accent-orange);">
+        <div class="chapter-header">
+          <span>ПРАВИЛА ДЛЯ ПАРТНЁРОВ ПРОЕКТА</span>
+          <span class="chapter-arrow">›</span>
+        </div>
+        <div class="chapter-content">
+          <div class="rule-section">
+            <div class="section-title">Партнёрские отношения</div>
+            <div class="rule-item">
+              <div class="item-title">Поддержка</div>
+              <div class="item-desc">Партнёры обязаны помогать проекту: реклама, ресурсы, идеи.</div>
+              <div class="item-punishment">Наказание: Расторжение партнёрства</div>
+            </div>
+            <div class="rule-item">
+              <div class="item-title">Реклама</div>
+              <div class="item-desc">Реклама партнёров — только в отведённых местах. Не в чате и не в голосовых каналах.</div>
+              <div class="item-punishment">Наказание: Предупреждение → Расторжение</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Футер -->
+  <footer class="metro-footer">
+    <div class="footer-content">
+      <div class="footer-column">
+        <h3>РАЗРАБОТКА</h3>
+        <p>Coldfire Project — 2024</p>
+        <p>Сервер: Paper 1.20.4</p>
+        <p>Плагины: Towny, GriefPrevention</p>
+      </div>
+      <div class="footer-column">
+        <h3>АВТОРСКИЕ ПРАВА</h3>
+        <p>© 2024 Coldfire Project</p>
+        <p>Вселенная Metro 2033 © Dmitry Glukhovsky</p>
+        <p>Minecraft © Mojang AB</p>
+      </div>
+      <div class="footer-column">
+        <h3>СВЯЗЬ</h3>
+        <a href="#">Discord сервер</a>
+        <a href="#">Форма жалоб</a>
+        <a href="#">Предложения</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Пепел -->
+  <div class="ash" id="ashCanvas"></div>
+
+  <script>
+    // Кастомный курсор (остался для обратной совместимости, используется metro2033-cursor.js)
+    const cursor = document.querySelector('.custom-cursor');
+    const cursorClick = document.getElementById('cursorClick');
+
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX - 12 + 'px';
+      cursor.style.top = e.clientY - 12 + 'px';
+    });
+
+    // Анимация клика
+    document.addEventListener('mousedown', (e) => {
+      cursorClick.style.left = e.clientX - 12 + 'px';
+      cursorClick.style.top = e.clientY - 12 + 'px';
+      cursorClick.style.transform = 'scale(0)';
+      cursorClick.style.opacity = '1';
+      
+      // Анимация клика
+      setTimeout(() => {
+        cursorClick.style.transform = 'scale(2)';
+        cursorClick.style.opacity = '0';
+      }, 10);
+    });
+
+    // Защита от копирования (Ctrl+C)
+    document.getElementById('rulesContainer').addEventListener('keydown', function(e) {
+      if (e.ctrlKey && (e.key === 'c' || e.key === 'C')) {
+        e.preventDefault();
+      }
+    });
+
+    // Переключение глав — только по заголовку
+    document.querySelectorAll('.chapter-header').forEach(header => {
+      header.addEventListener('click', function() {
+        const chapter = this.closest('.rule-chapter');
+        toggleChapter(chapter);
+      });
+    });
+
+    function toggleChapter(chapter) {
+      const content = chapter.querySelector('.chapter-content');
+      const arrow = chapter.querySelector('.chapter-arrow');
+      const items = content.querySelectorAll('.rule-item');
+
+      if (content.classList.contains('open')) {
+        // Закрытие
+        content.classList.remove('open');
+        arrow.textContent = '›';
+        items.forEach(item => item.classList.remove('show'));
+      } else {
+        // Открытие
+        // Сначала закроем все другие открытые вкладки
+        document.querySelectorAll('.chapter-content.open').forEach(otherContent => {
+          if (otherContent !== content) {
+            otherContent.classList.remove('open');
+            otherContent.closest('.rule-chapter').querySelector('.chapter-arrow').textContent = '›';
+            otherContent.querySelectorAll('.rule-item').forEach(item => item.classList.remove('show'));
+          }
+        });
+        
+        // Открываем текущую вкладку
+        content.classList.add('open');
+        arrow.textContent = '‹';
+        
+        // Анимация появления пунктов
+        items.forEach((item, i) => {
+          setTimeout(() => {
+            item.classList.add('show');
+          }, i * 100);
+        });
+      }
+    }
+
+    // Пепел — плавный маршрут
+    const ashCanvas = document.getElementById('ashCanvas');
+    const ashCount = 40;
+    const ashes = [];
+
+    for (let i = 0; i < ashCount; i++) {
+      const ash = document.createElement('div');
+      ash.className = 'ash-point';
+      const x = Math.random() * window.innerWidth;
+      const y = Math.random() * window.innerHeight;
+      ash.style.left = x + 'px';
+      ash.style.top = y + 'px';
+      ashCanvas.appendChild(ash);
+
+      // Направление и скорость
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 1 + 0.5;
+      const vx = Math.cos(angle) * speed;
+      const vy = Math.sin(angle) * speed;
+
+      ashes.push({ el: ash, x, y, vx, vy });
+    }
+
+    let mouseX = 0;
+    let mouseY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    function animateAsh() {
+      ashes.forEach(p => {
+        // Обновляем позицию
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Реакция на курсор
+        const dx = p.x - mouseX;
+        const dy = p.y - mouseY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < 150) {
+          const force = (150 - distance) / 150;
+          p.x += (dx / distance) * force * 3;
+          p.y += (dy / distance) * force * 3;
+        }
+
+        // Телепортация при выходе за край
+        if (p.x > window.innerWidth) p.x = 0;
+        if (p.x < 0) p.x = window.innerWidth;
+        if (p.y > window.innerHeight) p.y = 0;
+        if (p.y < 0) p.y = window.innerHeight;
+
+        p.el.style.left = p.x + 'px';
+        p.el.style.top = p.y + 'px';
+      });
+      requestAnimationFrame(animateAsh);
+    }
+
+    animateAsh();
+
+    // Инициализация - все вкладки закрыты по умолчанию
+    document.querySelectorAll('.chapter-content').forEach(el => {
+      el.classList.remove('open');
+    });
+  </script>
+</body>
+</html>

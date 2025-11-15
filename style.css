@@ -1,0 +1,562 @@
+/* Общие стили */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #282c34;
+    color: #abb2bf;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* Видео-фон */
+#bgVideo {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -1;
+    transform: translateX(-50%) translateY(-50%);
+    opacity: 0.2;
+}
+
+/* Шапка */
+header {
+    background-color: rgba(31, 35, 42, 0.8);
+    padding: 15px 0;
+    border-bottom: 2px solid #282c34;
+    z-index: 10;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between; /* Разделяем контент */
+    align-items: center;
+    padding: 0 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.left-panel {
+    display: flex;
+    align-items: center;
+}
+
+.avatar img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 15px;
+    border: 2px solid #61afef;
+    object-fit: cover;
+}
+
+.main-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: space-around; /* Равномерное расстояние между разделами */
+    width: 600px; /* Примерная ширина панели навигации */
+}
+
+.main-nav li {
+    margin: 0; /* Убираем отступы у элементов списка */
+}
+
+.main-nav a {
+    color: #abb2bf;
+    text-decoration: none;
+    padding: 10px 20px;
+    border: 1px solid #3a3f4a;
+    border-radius: 5px;
+    display: block;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    text-align: center; /* Центрируем текст в ссылке */
+}
+
+.main-nav a:hover {
+    background-color: #61afef;
+    color: #282c34;
+    border-color: #61afef;
+}
+
+/* Social Icons in Header */
+.right-panel {
+    display: flex;
+    align-items: center;
+}
+
+.social-icon {
+    color: #abb2bf;
+    font-size: 2em; /* Увеличиваем размер иконок */
+    margin-left: 15px;
+    transition: color 0.3s ease;
+}
+
+.social-icon:hover {
+    color: #61afef;
+}
+
+/* Основной контент */
+main {
+    padding: 30px 0;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.main-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 2%;
+}
+
+.project-info, .play-and-support {
+    width: 48%;
+    padding: 25px;
+    border: 1px solid #3a3f4a;
+    border-radius: 10px;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+    background-color: rgba(40, 44, 52, 0.8);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.project-info:hover, .play-and-support:hover {
+    background-color: rgba(58, 63, 74, 0.9);
+    border-color: #61afef;
+    transform: translateY(-5px);
+}
+
+.project-title h1 {
+    font-size: 2.8em;
+    margin-bottom: 15px;
+    color: #61afef;
+    text-shadow: 0 0 5px rgba(97, 175, 239, 0.5);
+}
+
+.project-description p {
+    font-size: 1.1em;
+    line-height: 1.8;
+}
+
+.play-and-support {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.play-and-support h2 {
+    margin-bottom: 20px;
+    color: #abb2bf;
+    text-align: center;
+}
+
+.play-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.play-button {
+    display: block;
+    padding: 15px 30px;
+    background-color: #e06c75;
+    color: #282c34;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 1.4em;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(224,108,117,0.5);
+    margin-bottom: 20px;
+}
+
+.play-button:hover {
+    background-color: #f08a92;
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(224,108,117,0.7);
+}
+
+.support-shop-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    gap: 20px;
+}
+
+.support-link, .shop-link {
+    display: block;
+    padding: 12px 25px;
+    background-color: #98c379;
+    color: #282c34;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 1.2em;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(152,195,121,0.5);
+}
+
+.support-link:hover, .shop-link:hover {
+    background-color: #b3e08a;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(152,195,121,0.7);
+}
+
+/* Скриншоты */
+.screenshots {
+    margin-bottom: 30px;
+    padding: 25px;
+    border: 1px solid #3a3f4a;
+    border-radius: 10px;
+    background-color: rgba(40, 44, 52, 0.8);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    text-align: center;
+}
+
+.screenshots:hover {
+    border-color: #61afef;
+    transform: translateY(-5px);
+}
+
+.screenshots h2 {
+    margin-bottom: 20px;
+    color: #61afef;
+}
+
+.screenshot-slider {
+    position: relative;
+}
+
+.screenshot-container {
+    display: flex;
+    overflow-x: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 15px;
+}
+
+.screenshot-slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex: 0 0 100%;
+    width: 100%;
+    scroll-snap-align: start;
+}
+
+.screenshot-item img {
+    width: 100%;
+    height: 200px;
+    border-radius: 8px;
+    border: 2px solid #3a3f4a;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    object-fit: cover;
+}
+
+.screenshot-navigation {
+    text-align: center;
+}
+
+.dot {
+    display: inline-block;
+    height: 12px;
+    width: 12px;
+    margin: 0 5px;
+    background-color: #3a3f4a;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.dot.active {
+    background-color: #e06c75;
+}
+
+/* Новости */
+.news {
+    margin-bottom: 30px;
+    padding: 25px;
+    border: 1px solid #3a3f4a;
+    border-radius: 10px;
+    background-color: rgba(40, 44, 52, 0.8);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.news:hover {
+    border-color: #61afef;
+    transform: translateY(-5px);
+}
+
+.news h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #61afef;
+}
+
+.news-list {
+    padding: 0;
+}
+
+.news-item {
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #3a3f4a;
+}
+
+.news-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.news-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.news-date {
+    color: #888;
+    font-size: 0.9em;
+}
+
+.news-divider {
+    margin: 0 10px;
+    color: #555;
+}
+
+.news-title {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.news-expand {
+    background: none;
+    border: none;
+    color: #61afef;
+    cursor: pointer;
+    font-size: 1.2em;
+    padding: 5px 10px;
+    transition: all 0.2s ease;
+    margin-left: auto;
+}
+
+.news-expand:hover {
+    color: #ffffff;
+    transform: scale(1.1);
+}
+
+.news-content {
+    display: none;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed #3a3f4a;
+}
+
+.news-content p {
+    margin-bottom: 20px;
+}
+
+.news-images {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.news-images img {
+    width: 30%;
+    max-width: 200px;
+    height: 150px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid #3a3f4a;
+    transition: all 0.3s ease;
+}
+
+.news-images img:hover {
+    transform: scale(1.03);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+}
+
+/* Нижний блок информации */
+.bottom-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    padding: 0;
+    gap: 2%;
+}
+
+.info-block {
+    padding: 25px;
+    border: 1px solid #3a3f4a;
+    border-radius: 10px;
+    box-sizing: border-box;
+    background-color: rgba(40, 44, 52, 0.8);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Vertical alignment */
+}
+
+.info-block:hover {
+    border-color: #61afef;
+    transform: translateY(-5px);
+}
+
+.info-block h3 {
+    color: #61afef;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+/* Style for Trailer */
+.trailer {
+    width: 100%;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Factions and Developers */
+.factions, .developers {
+    width: 30%;
+    text-align: center;
+}
+
+.factions img, .developers img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 15px auto;
+    display: block;
+}
+
+.factions p, .developers p {
+    margin-bottom: 20px;
+    text-align: center;
+    flex-grow: 1; /* Make paragraphs take up remaining space */
+}
+
+.more-button {
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
+    padding: 8px 15px;
+    background-color: #98c379;
+    color: #282c34;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.more-button:hover {
+    background-color: #b3e08a;
+    transform: translateY(-3px);
+}
+
+/* Footer */
+footer {
+    background-color: rgba(31, 35, 42, 0.9); /* Более темный полупрозрачный фон */
+    color: #ddd; /* Более светлый текст */
+    padding: 40px 0; /* Увеличиваем вертикальный отступ */
+    font-size: 0.9em;
+    border-top: 2px solid #444; /* Более заметная линия */
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.3); /* Тень */
+    z-index: 2; /* Приоритет над видео */
+}
+
+/* Улучшенные эффекты для футера */
+footer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('images/footer-background.jpg'); /* Текстура фона */
+    background-size: cover;
+    opacity: 0.3; /* Более заметная текстура */
+    pointer-events: none;
+    mix-blend-mode: overlay; /* Режим наложения */
+}
+
+footer::after {
+    content: "2033";
+    position: absolute;
+    bottom: 15px;
+    right: 20px;
+    font-size: 6em; /* Больше размер цифр */
+    color: #555; /* Более темный цвет цифр */
+    font-weight: bold;
+    opacity: 0.6; /* Более заметная надпись */
+    font-family: monospace;
+    text-shadow: 2px 2px 5px #111; /* Тень для надписи */
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 30px;
+    box-sizing: border-box;
+    position: relative; /* Чтобы контент был поверх псевдоэлементов */
+}
+
+.footer-copyright, .footer-disclaimer {
+    width: 45%;
+    text-align: left;
+}
+
+.footer-copyright p, .footer-disclaimer p {
+    margin-bottom: 10px;
+    font-size: 0.9em; /* Немного увеличен шрифт */
+}
+
+/* Дополнительные элементы для футера */
+.footer-decor {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 1.5em;
+    color: #61afef;
+    opacity: 0.5;
+    z-index: 1;
+}
+
+.footer-warning {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    font-size: 0.7em;
+    color: #e06c75;
+    opacity: 0.7;
+    z-index: 1;
+}

@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>О нас | Coldfire project</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <!-- Единый стиль Metro 2033 -->
+  <link rel="stylesheet" href="metro2033-unified.css">
+  <!-- Скрипт загрузочной заставки -->
+  <script src="metro2033-loader.js" defer></script>
+  <!-- Скрипт курсора -->
+  <script src="metro2033-cursor.js" defer></script>
+  <!-- Скрипт эффектов -->
+  <script src="metro2033-effects.js" defer></script>
+  <!-- Скрипт авторизации -->
+  <script src="auth-system.js" defer></script>
+  <!-- Скрипт модального окна пользователя -->
+  <script src="user-modal.js" defer></script>
+  <style>
+    /* Общие стили */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Courier New', monospace;
+    }
+
+    body {
+      background-color: #0a0a0a;
+      color: #0f2e5e;
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+      scroll-behavior: smooth;
+    }
+
+    /* Фоновое видео */
+    video#bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
+      opacity: 0.2;
+      pointer-events: none;
+    }
+
+    /* Шум на экране (атмосфера) */
+    .noise {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbiB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjEuMyIgbnVtT2N0YXZlcz0iNSIgc3RpdGNoVGlsZXM9InN0aXRjaCIvPjxmZUZsb29kIGZsb29kLWNvbG9yPSIjMDAwIiBmbG9vZC1vcGFjaXR5PSIwLjA1Ii8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI2EpIiBvcGFjaXR5PSIwLjciLz48L3N2Zz4=');
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Шапка */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 3rem;
+      background-color: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(8px);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      border-bottom: 3px solid #e74c3c;
+      box-shadow: 0 0 20px rgba(231, 76, 54, 0.6);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    header.hidden {
+      transform: translateY(-100%);
+    }
+
+    .logo {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: 4px solid #ffffff;
+      background: url('images/logo.png') no-repeat center;
+      background-size: cover;
+      cursor: pointer;
+      transition: all 0.4s ease;
+    }
+
+    .logo:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 1.8rem;
+    }
+
+    .nav-button {
+      background: rgba(255, 255, 255, 0.1);
+      color: #e74c3c;
+      padding: 0.9rem 1.6rem;
+      border: 2px solid #e74c3c;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: bold;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    .nav-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 0 20px rgba(231, 76, 54, 0.8);
+    }
+
+    /* Кнопка "О нас" скрыта */
+    .nav-button.active {
+      background: rgba(231, 76, 54, 0.3);
+      box-shadow: 0 0 20px rgba(231, 76, 54, 0.7);
+      pointer-events: none;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 1.8rem;
+    }
+
+    .social-link {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid #e74c3c;
+      font-size: 1.2rem;
+    }
+
+    .social-link:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.3);
+      box-shadow: 0 0 15px rgba(231, 76, 54, 0.7);
+    }
+
+    /* Основной контент */
+    main {
+      padding: 120px 2rem 0;
+      max-width: 1000px;
+      margin: 0 auto;
+      min-height: calc(100vh - 300px);
+    }
+
+    .section-title {
+      font-size: 3.2rem;
+      color: #00ffff;
+      text-shadow: 0 0 15px #00ffff;
+      letter-spacing: 4px;
+      margin-bottom: 3rem;
+      text-align: center;
+      position: relative;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 1s ease;
+    }
+
+    .section-title.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 60%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #e74c3c, transparent);
+      margin: 1.5rem auto;
+      box-shadow: 0 0 10px rgba(231, 76, 54, 0.7);
+    }
+
+    .terminal-block {
+      background: rgba(0, 0, 0, 0.85);
+      border: 3px solid #e74c3c;
+      border-radius: 12px;
+      padding: 2.5rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 0 25px rgba(231, 76, 54, 0.5);
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 1.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .terminal-block::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: all 1.5s ease;
+    }
+
+    .terminal-block:hover::before {
+      left: 100%;
+    }
+
+    .terminal-block.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .terminal-block h3 {
+      color: #00ff00;
+      text-shadow: 0 0 8px #00ff00;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      display: inline-block;
+    }
+
+    .terminal-block h3::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 70%;
+      height: 2px;
+      background: #00ff00;
+      box-shadow: 0 0 5px #00ff00;
+    }
+
+    .terminal-block p {
+      color: #fff;
+      line-height: 1.8;
+      font-size: 1.15rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .highlight {
+      color: #00ffff;
+      font-weight: bold;
+      text-shadow: 0 0 5px #00ffff;
+    }
+
+    .list-item {
+      color: #fff;
+      margin: 0.8rem 0;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .list-item::before {
+      content: '›';
+      color: #00ff00;
+      font-weight: bold;
+    }
+
+    /* Команда */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .team-card {
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid #e74c3c;
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.4s ease;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    .team-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .team-card:hover {
+      transform: translateY(-10px);
+      border-color: #00ff00;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+    }
+
+    .team-card img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid #e74c3c;
+      margin-bottom: 1rem;
+      background: #000;
+    }
+
+    .team-card h4 {
+      color: #00ff00;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 0 5px #00ff00;
+    }
+
+    .team-card p {
+      font-size: 0.95rem;
+      color: #ccc;
+    }
+
+    /* Кнопка "Назад" с анимацией провала */
+    .back-container {
+      text-align: center;
+      margin: 4rem 0;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(231, 76, 54, 0.2);
+      color: #e74c3c;
+      padding: 1rem 2.5rem;
+      border: 2px solid #e74c3c;
+      border-radius: 12px;
+      text-decoration: none;
+      font-size: 1.3rem;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .back-button:hover {
+      background: rgba(231, 76, 54, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 0 20px rgba(231, 76, 54, 0.7);
+    }
+
+    /* Анимация провала */
+    .tunnel-effect {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      z-index: 10000;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .tunnel-effect.active {
+      opacity: 1;
+    }
+
+    /* Футер */
+    footer {
+      padding: 4rem 2rem;
+      background: rgba(0, 0, 0, 0.9);
+      border-top: 4px solid #e74c3c;
+      box-shadow: 0 0 30px rgba(231, 76, 54, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    footer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #00ffff, transparent);
+      box-shadow: 0 0 10px #00ffff;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 3rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer-section h4 {
+      color: #00ffff;
+      text-shadow: 0 0 8px #00ffff;
+      margin-bottom: 1.5rem;
+      font-size: 1.4rem;
+    }
+
+    .footer-section p,
+    .footer-section a {
+      color: #ccc;
+      margin: 0.7rem 0;
+      display: block;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer-section a:hover {
+      color: #00ffff;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      font-weight: bold;
+    }
+
+    .status::after {
+      content: '█';
+      animation: blink 1.2s infinite;
+      color: #00ff00;
+    }
+
+    .social-footer {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .social-footer a {
+      color: #fff;
+      font-size: 1.3rem;
+    }
+
+    .copyright {
+      text-align: center;
+      margin-top: 3rem;
+      color: #aaa;
+      font-size: 0.9rem;
+      border-top: 1px solid rgba(231, 76, 54, 0.3);
+      padding-top: 1.5rem;
+    }
+
+    .copyright span {
+      color: #00ffff;
+      text-shadow: 0 0 5px #00ffff;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Фоновое видео -->
+  <video id="bg-video" autoplay muted loop>
+    <source src="images/background.mp4" type="video/mp4">
+    Ваш браузер не поддерживает видео.
+  </video>
+
+  <!-- Эффект шума -->
+  <div class="noise"></div>
+
+  <!-- Шапка -->
+  <header id="header">
+    <div class="logo" onclick="window.location.href='/'"></div>
+    <nav class="nav-buttons">
+      <button class="nav-button" onclick="window.location.href='projects.html'">Проекты</button>
+      <button class="nav-button active">О нас</button>
+      <button class="nav-button" onclick="window.location.href='rules.html'">Правила</button>
+      <button class="nav-button" onclick="window.location.href='support.html'">Поддержка</button>
+      <button class="nav-button" onclick="window.location.href='index.html'">На главную</button>
+    </nav>
+    <div class="social-links">
+      <a href="https://discord.gg" target="_blank" class="social-link">
+        <i class="fab fa-discord"></i>
+      </a>
+      <a href="https://vk.com" target="_blank" class="social-link">
+        <i class="fab fa-vk"></i>
+      </a>
+      <a href="https://youtube.com" target="_blank" class="social-link">
+        <i class="fab fa-youtube"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Анимация провала -->
+  <div class="tunnel-effect" id="tunnel"></div>
+
+  <!-- Основной контент -->
+  <main id="main" class="metro-container">
+    <h1 class="metro-title metro-glow-text metro-slide-in-right">О ПРОЕКТЕ</h1>
+
+    <div class="terminal-block metro-block metro-slide-in-left metro-border-glow" style="margin-bottom: 3rem;">
+      <h3 class="metro-glow-text" style="color: var(--metro-terminal-green);">ИСТОРИЯ СОЗДАНИЯ</h3>
+      <p>
+        Проект <span class="highlight">Coldfire</span> был основан в 2025 году группой энтузиастов, вдохновлённых вселенной <span class="highlight">Metro 2033</span> и постапокалиптической эстетикой.
+      </p>
+      <p>
+        Первоначально это был небольшой сервер в Minecraft, где участники воссоздавали станции метро. Сегодня Coldfire — это <span class="highlight">многопользовательская вселенная</span> с глубокой ролевой игрой, собственной культурой и архитектурой.
+      </p>
+    </div>
+
+    <div class="terminal-block metro-block metro-slide-in-right metro-border-glow" style="margin-bottom: 3rem;">
+      <h3 class="metro-glow-text" style="color: var(--metro-terminal-green);">НАШИ ЦЕЛИ</h3>
+      <div class="list-item"><span>Создать атмосферу настоящего выживания</span></div>
+      <div class="list-item"><span>Развивать свободную ролевую игру</span></div>
+      <div class="list-item"><span>Поддерживать технические инновации</span></div>
+      <div class="list-item"><span>Строить живое и активное сообщество</span></div>
+      <p style="margin-top: 1.5rem;">
+        Мы не просто строим — мы <span class="highlight">рассказываем истории</span>, которые будут помнить.
+      </p>
+    </div>
+
+    <div class="terminal-block metro-block metro-slide-in-left metro-border-glow" style="margin-bottom: 3rem;">
+      <h3 class="metro-glow-text" style="color: var(--metro-terminal-green);">ДОСТИЖЕНИЯ</h3>
+      <p>
+        За 1 год мы:
+      </p>
+      <div class="list-item">Построили более <span class="highlight">30 станций</span></div>
+      <div class="list-item">Запустили 1 режим: <span class="highlight">Merto 2033 RP</span></div>
+      <div class="list-item">2 режима находятся в активной разработке: <span class="highlight">Zombie server & Stalker RP</span></div>
+      <div class="list-item">Привлекли более <span class="highlight">1000 игроков</span></div>
+      <div class="list-item">Получили признание на серверных платформах</div>
+    </div>
+
+    <div class="terminal-block metro-block metro-slide-in-right metro-border-glow" style="margin-bottom: 3rem;">
+      <h3 class="metro-glow-text" style="color: var(--metro-terminal-green);">КОМАНДА</h3>
+      <p>Нас <span class="highlight">12 человек</span>. Каждый — не просто модератор, а часть истории.</p>
+      <div class="team-grid">
+        <div class="team-card metro-flip metro-border-glow" style="border: 2px solid var(--metro-terminal-green);">
+          <img src="images/Ussr.png" alt="Alexey" />
+          <h4 class="metro-glow-text" style="color: var(--metro-terminal-green);">alexey_sokolov188</h4>
+          <p>Основатель</p>
+        </div>
+        <div class="team-card metro-flip metro-border-glow" style="border: 2px solid var(--metro-terminal-green);">
+          <img src="images/Polis.png" alt="Dev2" />
+          <h4 class="metro-glow-text" style="color: var(--metro-terminal-green);">egortyfgs_5999</h4>
+          <p>Зам основателя</p>
+        </div>
+        <div class="team-card metro-flip metro-border-glow" style="border: 2px solid var(--metro-terminal-green);">
+          <img src="images/Nazi.png" alt="Dev3" />
+          <h4 class="metro-glow-text" style="color: var(--metro-terminal-green);">sephiroth3246</h4>
+          <p>Помощник основателя и тех админ</p>
+        </div>
+        <div class="team-card metro-flip metro-border-glow" style="border: 2px solid var(--metro-terminal-green);">
+          <img src="images/Китайка.png" alt="Dev4" />
+          <h4 class="metro-glow-text" style="color: var(--metro-terminal-green);">zverobob112</h4>
+          <p>Разработчик</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="back-container">
+      <a href="index.html" class="metro-btn metro-shake" id="backBtn" style="font-size: 1.2rem; padding: 1rem 2rem;">
+        <i class="fas fa-arrow-left"></i> ВЕРНУТЬСЯ НА ГЛАВНУЮ
+      </a>
+    </div>
+  </main>
+
+  <!-- Футер -->
+  <footer class="metro-footer">
+    <div class="footer-grid">
+      <div class="footer-section">
+        <h4>ПОДКЛЮЧЕНИЕ</h4>
+        <p>Скачать лаунчер можно <a href="index.html">тут</a></p>
+        <p>Версия: 1.20.1</p>
+        <div class="status">Статус: Онлайн</div>
+      </div>
+      <div class="footer-section">
+        <h4>СОЦСЕТИ</h4>
+        <a href="https://discord.gg">Discord</a>
+        <a href="https://vk.com">VK</a>
+        <a href="https://youtube.com">YouTube</a>
+        <div class="social-footer">
+          <a href="#"><i class="fab fa-discord"></i></a>
+          <a href="#"><i class="fab fa-vk"></i></a>
+          <a href="#"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
+      <div class="footer-section">
+        <h4>ИНФОРМАЦИЯ</h4>
+        <a href="/rules">Правила</a>
+        <a href="/support">Поддержка</a>
+        <a href="/shop">Магазин</a>
+      </div>
+      <div class="footer-section">
+        <h4>О ПРОЕКТЕ</h4>
+        <p>Coldfire — это не сервер. Это <span class="highlight">новый мир</span>, созданный игроками для игроков.</p>
+      </div>
+    </div>
+    <div class="copyright">
+      &copy; <span>2025 Coldfire project</span>. Все права защищены. Не связано с 4A Games.
+    </div>
+  </footer>
+
+  <!-- Аудио -->
+  <audio id="typeSound" src="images/печать.mp3" preload="auto"></audio>
+  <audio id="clickSound" src="images/клик.mp3" preload="auto"></audio>
+  <audio id="radioSound" src="images/Счётчик гей.mp3" preload="auto"></audio>
+
+  <script>
+    const typeSound = document.getElementById('typeSound');
+    const clickSound = document.getElementById('clickSound');
+    const radioSound = document.getElementById('radioSound');
+    const tunnel = document.getElementById('tunnel');
+    const backBtn = document.getElementById('backBtn');
+    const header = document.getElementById('header');
+
+    typeSound.volume = 0.4;
+    clickSound.volume = 0.3;
+    radioSound.volume = 0.2;
+
+    // Анимация появления заголовка
+    setTimeout(() => {
+      document.querySelector('.section-title').classList.add('visible');
+    }, 300);
+
+    // Анимация появления блоков при скролле
+    const blocks = document.querySelectorAll('.terminal-block, .team-card');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          if (entry.target.classList.contains('terminal-block')) {
+            playRadioStatic();
+          }
+        }
+      });
+    }, { threshold: 0.1 });
+
+    blocks.forEach(block => observer.observe(block));
+
+    // Эффект печатающегося текста
+    function typeText(element, text, speed = 60) {
+      let i = 0;
+      element.textContent = '';
+      const timer = setInterval(() => {
+        if (i < text.length) {
+          element.textContent += text[i];
+          playTypeSound();
+          i++;
+        } else {
+          clearInterval(timer);
+        }
+      }, speed);
+    }
+
+    // Автоматическая типизация для первых двух абзацев
+    document.addEventListener('DOMContentLoaded', () => {
+      const paragraphs = document.querySelectorAll('.terminal-block p');
+      if (paragraphs[0]) typeText(paragraphs[0], paragraphs[0].textContent, 50);
+      if (paragraphs[1]) typeText(paragraphs[1], paragraphs[1].textContent, 50);
+    });
+
+    function playTypeSound() {
+      typeSound.currentTime = 0;
+      typeSound.play().catch(() => {});
+    }
+
+    function playRadioStatic() {
+      radioSound.currentTime = 0;
+      radioSound.play().catch(() => {});
+    }
+
+    // Кнопка "Назад" с анимацией провала
+    backBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      tunnel.classList.add('active');
+      clickSound.currentTime = 0;
+      clickSound.play().catch(() => {});
+
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 800);
+    });
+
+    // Скрытие шапки при прокрутке
+    let lastScrollTop = 0;
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.scrollY;
+      if (scrollTop > lastScrollTop && scrollTop > 100) {
+        header.classList.add('hidden');
+      } else if (scrollTop < lastScrollTop) {
+        header.classList.remove('hidden');
+      }
+      lastScrollTop = scrollTop;
+    });
+  </script>
+</body>
+</html>

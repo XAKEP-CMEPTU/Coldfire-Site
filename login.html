@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Авторизация | Coldfire Project</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="metro2033-unified.css">
+  <script src="metro2033-loader.js" defer></script>
+  <script src="metro2033-cursor.js" defer></script>
+  <script src="metro2033-effects.js" defer></script>
+  
+  <style>
+    .auth-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: calc(100vh - 200px);
+      padding: 2rem;
+    }
+
+    .auth-box {
+      background: rgba(0, 0, 0, 0.9);
+      border: 3px solid var(--metro-accent-red);
+      border-radius: 12px;
+      padding: 3rem;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 
+        0 0 30px rgba(231, 76, 60, 0.5),
+        inset 0 0 30px rgba(0, 0, 0, 0.8);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(231, 76, 60, 0.1), transparent);
+      animation: scan 3s infinite;
+    }
+
+    .auth-title {
+      font-size: 2.5rem;
+      color: var(--metro-accent-red);
+      text-align: center;
+      margin-bottom: 2rem;
+      text-shadow: 0 0 15px rgba(231, 76, 60, 0.8);
+      letter-spacing: 3px;
+      font-family: 'VT323', monospace;
+    }
+
+    .auth-form-group {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .auth-label {
+      display: block;
+      color: var(--metro-terminal-green);
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+      text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+      font-family: 'VT323', monospace;
+    }
+
+    .auth-input {
+      width: 100%;
+      padding: 0.8rem;
+      background: rgba(10, 10, 20, 0.8);
+      border: 2px solid var(--metro-border);
+      border-radius: 6px;
+      color: var(--metro-text);
+      font-family: 'VT323', monospace;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .auth-input:focus {
+      border-color: var(--metro-accent-red);
+      box-shadow: 0 0 15px rgba(231, 76, 60, 0.5);
+      background: rgba(20, 20, 30, 0.9);
+    }
+
+    .auth-input::placeholder {
+      color: rgba(170, 170, 170, 0.5);
+    }
+
+    .auth-btn {
+      width: 100%;
+      padding: 1rem;
+      background: rgba(231, 76, 60, 0.2);
+      border: 2px solid var(--metro-accent-red);
+      color: var(--metro-accent-red);
+      font-family: 'VT323', monospace;
+      font-size: 1.3rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .auth-btn:hover {
+      background: rgba(231, 76, 60, 0.4);
+      box-shadow: 0 0 20px rgba(231, 76, 60, 0.7);
+      transform: scale(1.02);
+    }
+
+    .auth-link {
+      display: block;
+      text-align: center;
+      margin-top: 1.5rem;
+      color: var(--metro-terminal-cyan);
+      text-decoration: none;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .auth-link:hover {
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+      transform: scale(1.05);
+    }
+
+    .auth-error {
+      background: rgba(231, 76, 60, 0.2);
+      border: 2px solid var(--metro-accent-red);
+      color: var(--metro-accent-red);
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1.5rem;
+      display: none;
+      text-align: center;
+      font-family: 'VT323', monospace;
+      font-size: 1rem;
+    }
+
+    .auth-error.show {
+      display: block;
+      animation: shake 0.5s;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 10px;
+      top: 38px;
+      background: none;
+      border: none;
+      color: var(--metro-terminal-green);
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .password-toggle:hover {
+      color: var(--metro-accent-red);
+      transform: scale(1.2);
+    }
+  </style>
+</head>
+<body>
+  <header class="metro-header">
+    <div class="metro-logo" onclick="window.location.href='index.html'"></div>
+    <nav class="metro-nav">
+      <a href="index.html" class="metro-nav-button">Главная</a>
+      <a href="projects.html" class="metro-nav-button">Проекты</a>
+      <a href="about.html" class="metro-nav-button">О нас</a>
+      <a href="rules.html" class="metro-nav-button">Правила</a>
+    </nav>
+    <div class="metro-social">
+      <a href="#" class="metro-social-link"><i class="fab fa-discord"></i></a>
+      <a href="#" class="metro-social-link"><i class="fab fa-vk"></i></a>
+      <a href="#" class="metro-social-link"><i class="fab fa-youtube"></i></a>
+    </div>
+  </header>
+
+  <div class="auth-container">
+    <div class="auth-box metro-slide-in-left">
+      <h1 class="auth-title">АВТОРИЗАЦИЯ</h1>
+      <div class="auth-error" id="errorMessage"></div>
+      <form id="loginForm">
+        <div class="auth-form-group">
+          <label class="auth-label" for="loginUsername">ЛОГИН</label>
+          <input 
+            type="text" 
+            id="loginUsername" 
+            class="auth-input" 
+            placeholder="Введите логин" 
+            required
+            autocomplete="username"
+          >
+        </div>
+        <div class="auth-form-group">
+          <label class="auth-label" for="loginPassword">ПАРОЛЬ</label>
+          <input 
+            type="password" 
+            id="loginPassword" 
+            class="auth-input" 
+            placeholder="Введите пароль" 
+            required
+            autocomplete="current-password"
+          >
+          <button type="button" class="password-toggle" onclick="togglePassword('loginPassword')">
+            <i class="fas fa-eye" id="loginPasswordToggle"></i>
+          </button>
+        </div>
+        <button type="submit" class="auth-btn metro-shake">ВОЙТИ</button>
+      </form>
+      <a href="register.html" class="auth-link">НЕТ АККАУНТА? ЗАРЕГИСТРИРОВАТЬСЯ</a>
+    </div>
+  </div>
+
+  <footer class="metro-footer">
+    <div class="metro-footer-content">
+      <div class="footer-left">
+        <p>© 2025 | STORM Studio. Все права защищены.</p>
+        <p>Создано с любовью в бункере №7.</p>
+      </div>
+      <div class="footer-right">
+        <p>Данный сайт не является официальным продуктом 4A Games.</p>
+      </div>
+    </div>
+    <div class="metro-footer-year">2033</div>
+  </footer>
+
+  <script src="auth-system.js"></script>
+  <script>
+    function togglePassword(inputId) {
+      const input = document.getElementById(inputId);
+      const toggle = document.getElementById(inputId + 'Toggle');
+      
+      if (input.type === 'password') {
+        input.type = 'text';
+        toggle.classList.remove('fa-eye');
+        toggle.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        toggle.classList.remove('fa-eye-slash');
+        toggle.classList.add('fa-eye');
+      }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      if (authSystem.login(username, password)) {
+        window.location.href = 'index.html';
+      } else {
+        const err = authSystem.getLastLoginError();
+        if (err === 'banned') {
+          // Пытаемся показать детали бана
+          try {
+            const users = JSON.parse(localStorage.getItem('metro2033_users')) || {};
+            const u = users[username.toLowerCase()];
+            const till = (u && u.ban && u.ban.until) ? new Date(u.ban.until) : null;
+            const reason = (u && u.ban && u.ban.reason) ? u.ban.reason : 'Не указана';
+            const tillText = till ? till.toLocaleString('ru-RU') : 'бессрочно';
+            showError('Аккаунт заблокирован до ' + tillText + '. Причина: ' + reason);
+          } catch (_) {
+            showError('Аккаунт заблокирован. Обратитесь к администрации.');
+          }
+        } else if (err === 'wrong_password' || err === 'not_found') {
+          showError('Неверный логин или пароль!');
+        } else {
+          showError('Не удалось войти. Попробуйте ещё раз.');
+        }
+      }
+    });
+
+    function showError(message) {
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.textContent = message;
+      errorDiv.classList.add('show');
+      setTimeout(() => {
+        errorDiv.classList.remove('show');
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
+

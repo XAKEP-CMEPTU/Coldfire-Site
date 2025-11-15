@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coldfire Project — Поддержка</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <!-- Единый стиль Metro 2033 -->
+  <link rel="stylesheet" href="metro2033-unified.css">
+  <!-- Скрипт загрузочной заставки -->
+  <script src="metro2033-loader.js" defer></script>
+  <!-- Скрипт курсора -->
+  <script src="metro2033-cursor.js" defer></script>
+  <!-- Скрипт эффектов -->
+  <script src="metro2033-effects.js" defer></script>
+  <!-- Скрипт авторизации -->
+  <script src="auth-system.js" defer></script>
+  <!-- Скрипт модального окна пользователя -->
+  <script src="user-modal.js" defer></script>
+  <!-- Скрипт системы чатов (серверная версия) -->
+  <script src="chat-system-server.js" defer></script>
+  <style>
+    :root {
+      --primary-bg: #0a0a0f;
+      --secondary-bg: #12121a;
+      --accent: #39FF14;
+      --accent-glow: #39FF1480;
+      --text: #e0e0e0;
+      --border: #333;
+      --danger: #ff6b35;
+      --scrollbar-bg: #1a1a2e;
+      --scrollbar-thumb: #39FF14;
+      --scrollbar-thumb-hover: #39FF14cc;
+      --rust-texture: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.03"><rect width="100" height="100" fill="white"/></svg>');
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'VT323', monospace;
+    }
+
+    body {
+      background: var(--primary-bg);
+      color: var(--text);
+      line-height: 1.6;
+      position: relative;
+      overflow-x: hidden;
+      min-height: 100vh;
+      background-image: 
+        repeating-linear-gradient(
+          0deg,
+          rgba(0, 255, 0, 0.02) 0px,
+          rgba(0, 255, 0, 0.02) 1px,
+          transparent 1px,
+          transparent 2px
+        ),
+        var(--rust-texture);
+      background-attachment: fixed;
+    }
+
+    /* ==== ЭФФЕКТЫ ФОНА ==== */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        repeating-linear-gradient(
+          0deg,
+          rgba(0, 255, 0, 0.02) 0px,
+          rgba(0, 255, 0, 0.02) 1px,
+          transparent 1px,
+          transparent 2px
+        );
+      pointer-events: none;
+      z-index: -2;
+      animation: scanlines 8s linear infinite;
+    }
+
+    @keyframes scanlines {
+      0% { background-position: 0 0; }
+      100% { background-position: 0 100%; }
+    }
+
+    /* ==== АНИМАЦИЯ ПАДАЮЩЕГО ПЕПЛА ==== */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(10, 10, 15, 0.8) 0%, transparent 20%),
+        radial-gradient(circle at 80% 70%, rgba(10, 10, 15, 0.8) 0%, transparent 20%);
+      pointer-events: none;
+      z-index: -1;
+      animation: ashFall 10s linear infinite;
+    }
+
+    @keyframes ashFall {
+      0% { background-position: 0 0; }
+      100% { background-position: 0 100%; }
+    }
+
+    /* Разделитель секций и мягкие анимации для блока чатов */
+    .section-divider {
+      height: 16px;
+      margin: 24px 0;
+      border-top: 2px dashed rgba(0,255,0,0.25);
+    }
+    .metro-chat-interface { animation: fadeUp .25s ease; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ==== ШАПКА ==== */
+    .header {
+      background: linear-gradient(135deg, #0d0d15, #1a1a2e);
+      padding: 15px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #333;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: url('images/logo.png') center/cover;
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+      transition: transform 0.3s ease;
+    }
+
+    .logo:hover {
+      transform: scale(1.05);
+    }
+
+    .project-name {
+      font-size: 1.8em;
+      color: var(--accent);
+      text-shadow: 0 0 5px var(--accent-glow);
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      background: var(--secondary-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1em;
+    }
+
+    .nav-btn:hover {
+      background: var(--accent-glow);
+      color: #000;
+      border-color: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .nav-btn.active {
+      background: var(--accent-glow);
+      color: #000;
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    /* ==== КНОПКА НА ГЛАВНУЮ ==== */
+    .home-btn {
+      background: var(--accent-glow);
+      color: #000;
+      border: 1px solid var(--accent);
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1em;
+      font-weight: bold;
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    .home-btn:hover {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .social-icons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .social-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--secondary-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .social-icon:hover {
+      transform: scale(1.15);
+      box-shadow: 0 0 12px var(--accent-glow);
+      background: var(--accent-glow);
+    }
+
+    .social-icon svg {
+      width: 22px;
+      height: 22px;
+      fill: white;
+    }
+
+    .social-icon:hover svg {
+      fill: black;
+    }
+
+    /* ==== ОСНОВНОЙ КОНТЕЙНЕР ==== */
+    .container {
+      display: flex;
+      min-height: calc(100vh - 120px);
+      padding: 20px;
+      gap: 20px;
+    }
+
+    /* ==== БОКОВАЯ ПАНЕЛЬ ==== */
+    .sidebar {
+      width: 280px;
+      background: var(--secondary-bg);
+      border-radius: 8px;
+      padding: 0;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      border: 1px solid #2a2a3a;
+      max-height: calc(100vh - 160px);
+      overflow-y: auto;
+      position: relative;
+    }
+
+    /* ==== КАСТОМНЫЙ СКРОЛЛБАР ==== */
+    .sidebar::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+      background: var(--scrollbar-bg);
+      border-radius: 5px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 5px;
+      border: 2px solid var(--scrollbar-bg);
+    }
+
+    .sidebar::-webkit-scrollbar-thumb:hover {
+      background: var(--scrollbar-thumb-hover);
+    }
+
+    /* ==== ЗАГОЛОВОК СТАТИЧЕН И БЕЗ ЗАЗОРА ==== */
+    .sidebar-header {
+      position: sticky;
+      top: 0;
+      background: var(--secondary-bg);
+      padding: 15px 0;
+      text-align: center;
+      z-index: 10;
+      border-bottom: 1px solid var(--border);
+      color: var(--accent);
+      font-size: 1.3em;
+      margin: 0;
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+
+    .categories {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .category {
+      margin: 0;
+    }
+
+    .category > span {
+      display: block;
+      padding: 12px 15px;
+      background: var(--secondary-bg);
+      border-left: 4px solid var(--accent);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      font-weight: bold;
+      border-radius: 0;
+      position: relative;
+    }
+
+    .category > span:before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .category > span:hover {
+      background: var(--accent-glow);
+      color: #000;
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    .subcategories {
+      list-style: none;
+      margin: 0;
+      padding-left: 15px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .subcategories li {
+      padding: 10px 12px;
+      margin: 6px 0;
+      background: rgba(30, 30, 40, 0.5);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-left: 2px solid transparent;
+    }
+
+    .subcategories li:hover {
+      background: var(--accent-glow);
+      color: #000;
+      border-left: 2px solid var(--accent);
+    }
+
+    .subcategories li.active {
+      background: var(--accent-glow);
+      color: #000;
+      border-left: 3px solid var(--accent);
+      box-shadow: 0 0 5px var(--accent-glow);
+    }
+
+    /* ==== ОСНОВНОЙ КОНТЕНТ ==== */
+    .main-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ==== ПОИСК ==== */
+    .search-bar {
+      background: var(--secondary-bg);
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+      border: 1px solid #2a2a3a;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px;
+      background: rgba(10, 10, 20, 0.7);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 5px;
+      font-size: 1.1em;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    .search-input::placeholder {
+      color: #666;
+    }
+
+    .main-content {
+      background: var(--secondary-bg);
+      border-radius: 8px;
+      padding: 25px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      overflow-y: auto;
+      flex: 1;
+      border: 1px solid #2a2a3a;
+    }
+
+    .content-placeholder {
+      text-align: center;
+      padding: 60px 20px;
+      color: #aaa;
+    }
+
+    .content-placeholder h2 {
+      color: var(--accent);
+      margin-bottom: 15px;
+      font-size: 1.6em;
+    }
+
+    .article {
+      padding: 20px;
+      background: rgba(20, 20, 30, 0.6);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid var(--accent);
+      animation: slideIn 0.4s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .article h2 {
+      color: var(--accent);
+      margin-bottom: 15px;
+      font-size: 1.5em;
+    }
+
+    /* ==== ЭМБЕД ОБРАТНОЙ СВЯЗИ ==== */
+    .feedback-section {
+      background: url('images/metro_background.gif') center/cover;
+      padding: 40px 20px;
+      margin: 30px 20px;
+      border-radius: 10px;
+      box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.8);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--accent);
+    }
+
+    .feedback-container {
+      max-width: 650px;
+      margin: 0 auto;
+      background: rgba(5, 5, 10, 0.85);
+      padding: 30px;
+      border-radius: 10px;
+      border: 1px solid var(--accent);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .feedback-title {
+      color: var(--accent);
+      text-align: center;
+      margin-bottom: 25px;
+      font-size: 1.8em;
+      text-shadow: 0 0 5px var(--accent-glow);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--accent);
+      font-size: 1.1em;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 12px;
+      background: rgba(10, 10, 20, 0.7);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 5px;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--accent);
+      outline: none;
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .submit-button {
+      width: 100%;
+      padding: 15px;
+      background: var(--accent-glow);
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      font-size: 1.3em;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: 'VT323', monospace;
+      margin-top: 10px;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .submit-button:hover {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 20px var(--accent-glow);
+      transform: scale(1.02);
+    }
+
+    .submit-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .success-message {
+      color: var(--accent);
+      text-align: center;
+      margin-top: 20px;
+      font-size: 1.2em;
+      display: none;
+      animation: pulse 1.5s infinite;
+    }
+
+    .error-message {
+      color: var(--danger);
+      text-align: center;
+      margin-top: 20px;
+      font-size: 1.2em;
+      display: none;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* ==== ФУТЕР ==== */
+    .footer {
+      background: linear-gradient(to right, #0c0c15, #1a1a2e, #0c0c15);
+      padding: 25px 20px;
+      text-align: center;
+      border-top: 2px solid var(--accent);
+      position: relative;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+
+    .footer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        135deg,
+        transparent,
+        transparent 10px,
+        rgba(0, 255, 0, 0.05) 10px,
+        rgba(0, 255, 0, 0.05) 20px
+      );
+      pointer-events: none;
+      opacity: 0.4;
+    }
+
+    .footer-content {
+      position: relative;
+      z-index: 2;
+      max-width: 1000px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      text-align: left;
+    }
+
+    .footer-column {
+      padding: 15px;
+      background: rgba(10, 10, 20, 0.3);
+      border-radius: 8px;
+      border: 1px solid #2a2a3a;
+    }
+
+    .footer-column h4 {
+      color: var(--accent);
+      margin-bottom: 10px;
+      font-size: 1.1em;
+      text-align: center;
+    }
+
+    .footer p, .footer a {
+      color: #ccc;
+      font-size: 0.95em;
+      line-height: 1.5;
+    }
+
+    .footer a {
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer a:hover {
+      color: var(--accent);
+      text-shadow: 0 0 5px var(--accent-glow);
+    }
+
+    .copyright {
+      margin-top: 15px;
+      padding-top: 10px;
+      border-top: 1px solid #333;
+      color: #888;
+      font-size: 0.9em;
+      text-align: center;
+    }
+
+    /* ==== АНИМАЦИИ ==== */
+    @keyframes glow {
+      0% { box-shadow: 0 0 5px var(--accent-glow); }
+      50% { box-shadow: 0 0 20px var(--accent-glow); }
+      100% { box-shadow: 0 0 5px var(--accent-glow); }
+    }
+
+    .pulse {
+      animation: glow 2s infinite;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Мобильная версия */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        max-height: 300px;
+      }
+      .footer-content {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ШАПКА -->
+  <header class="header">
+    <div class="logo-container">
+      <div class="logo pulse"></div>
+      <div class="project-name">Coldfire Project</div>
+    </div>
+    <div class="nav-buttons">
+      <a href="projects.html" class="nav-btn">Проекты</a>
+      <a href="about.html" class="nav-btn">О нас</a>
+      <a href="rules.html" class="nav-btn">Правила</a>
+      <div class="home-btn" onclick="window.location.href='index.html'">На главную</div>
+    </div>
+    <div class="social-icons">
+      <a href="https://discord.gg/42n9vkRX37" target="_blank" class="social-icon">
+        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v10/icons/discord.svg" alt="Discord" width="22" height="22">
+      </a>
+      <a href="https://t.me/coldfire2033" target="_blank" class="social-icon">
+        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v10/icons/telegram.svg" alt="Telegram" width="22" height="22">
+      </a>
+      <a href="#" target="_blank" class="social-icon">
+        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v10/icons/tiktok.svg" alt="TikTok" width="22" height="22">
+      </a>
+    </div>
+    </div>
+  </header>
+
+  <!-- ОСНОВНОЙ КОНТЕЙНЕР -->
+  <div class="container">
+    <!-- БОКОВАЯ ПАНЕЛЬ -->
+    <aside class="sidebar metro-slide-in-left" style="border: 2px solid var(--metro-terminal-green); box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);">
+      <div class="sidebar-header metro-glow-text" style="color: var(--metro-terminal-green);">РАЗДЕЛЫ ПОМОЩИ</div>
+      <ul class="categories" id="categoriesList">
+        <li class="category" data-category="getting-started">
+          <span>Начало игры</span>
+          <ul class="subcategories">
+            <li data-section="install">Установка модпака</li>
+            <li data-section="first-steps">Первые шаги</li>
+            <li data-section="survival">Выживание в метро</li>
+            <li data-section="controls">Управление</li>
+          </ul>
+        </li>
+        <li class="category" data-category="weapons">
+          <span>Оружие и боеприпасы</span>
+          <ul class="subcategories">
+            <li data-section="handmade">Самодельное оружие</li>
+            <li data-section="military">Армейское оружие</li>
+            <li data-section="ammo">Боеприпасы</li>
+            <li data-section="mods">Модификации</li>
+          </ul>
+        </li>
+        <li class="category" data-category="factions">
+          <span>Фракции</span>
+          <ul class="subcategories">
+            <li data-section="hanza">Ганза</li>
+            <li data-section="nazi">4 рейх</li>
+            <li data-section="vdnh">ВДНХ</li>
+            <li data-section="red-line">Красная Линия</li>
+            <li data-section="nomads">Китай-город</li>
+            <li data-section="neutral">Полис</li>
+          </ul>
+        </li>
+        <li class="category" data-category="crafting">
+          <span>Крафт и ресурсы</span>
+          <ul class="subcategories">
+            <li data-section="tools">Инструменты</li>
+            <li data-section="armor">Броня</li>
+            <li data-section="items">Предметы выживания</li>
+            <li data-section="stations">Верстаки</li>
+          </ul>
+        </li>
+        <li class="category" data-category="bugs">
+          <span>Баги и ошибки</span>
+          <ul class="subcategories">
+            <li data-section="crash">Краши</li>
+            <li data-section="glitches">Глитчи</li>
+            <li data-section="fixes">Как исправить</li>
+            <li data-section="logs">Прислать логи</li>
+          </ul>
+        </li>
+        <li class="category" data-category="lore">
+          <span>Лор и мир</span>
+          <ul class="subcategories">
+            <li data-section="stations">Станции метро</li>
+            <li data-section="mutants">Мутанты</li>
+            <li data-section="history">История мира</li>
+          </ul>
+        </li>
+        <li class="category" data-category="multiplayer">
+          <span>Мультиплеер</span>
+          <ul class="subcategories">
+            <li data-section="server">Подключение к серверу</li>
+            <li data-section="rules">Правила сервера</li>
+            <li data-section="pvp">PvP и РП процесс</li>
+          </ul>
+        </li>
+        <li class="category" data-category="updates">
+          <span>Обновления</span>
+          <ul class="subcategories">
+            <li data-section="changelog">Список изменений</li>
+            <li data-section="roadmap">Планы развития</li>
+          </ul>
+        </li>
+        <li class="category" data-category="faq">
+          <span>Частые вопросы (FAQ)</span>
+          <ul class="subcategories">
+            <li data-section="performance">Низкий FPS</li>
+            <li data-section="mods">Совместимость модов</li>
+            <li data-section="save">Пропал тайник</li>
+          </ul>
+        </li>
+        <li class="category" data-category="community">
+          <span>Сообщество</span>
+          <ul class="subcategories">
+            <li data-section="events">Ивенты</li>
+            <li data-section="contests">Конкурсы</li>
+            <li data-section="guides">Гайды игроков</li>
+          </ul>
+        </li>
+        <li class="category" data-category="advanced">
+          <span>Продвинутые механики</span>
+          <ul class="subcategories">
+            <li data-section="radiation">Радиация</li>
+            <li data-section="hunger">Голод и жажда</li>
+            <li data-section="morale">Мораль</li>
+          </ul>
+        </li>
+        <li class="category" data-category="trading">
+          <span>Торговля</span>
+          <ul class="subcategories">
+            <li data-section="currency">Валюта</li>
+            <li data-section="traders">Торговцы</li>
+            <li data-section="barter">Бартер</li>
+          </ul>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ С ПОИСКОМ -->
+    <div class="main-area">
+      <div class="search-bar metro-slide-in-right metro-border-glow" style="border: 2px solid var(--metro-terminal-green); box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);">
+        <input type="text" class="search-input" id="searchInput" placeholder="Поиск по разделам... (например: 'Китай-город', 'Радиация', 'Установка', 'Ганза')" style="border-color: var(--metro-terminal-green);">
+      </div>
+
+      <main class="main-content metro-slide-in-left" id="mainContent" style="border: 2px solid var(--metro-terminal-green); box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);">
+        <div class="content-placeholder">
+          <h2>Выберите раздел или воспользуйтесь поиском</h2>
+          <p>Найдите нужную информацию быстро и легко.</p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ЭМБЕД ОБРАТНОЙ СВЯЗИ -->
+  <section class="feedback-section">
+    <div class="feedback-container">
+      <h2 class="feedback-title">Обратная связь</h2>
+      <form id="supportForm">
+        <div class="form-group">
+          <label class="form-label">Ваш никнейм в Minecraft:</label>
+          <input type="text" class="form-input" id="playerName" required placeholder="AlexTheSurvivor">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ваш Discord ID (опционально):</label>
+          <input type="text" class="form-input" id="discordId" placeholder="123456789012345678 или @ник">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Тема обращения:</label>
+          <select class="form-select" id="topic" required>
+            <option value="">Выберите тему</option>
+            <option value="bug">Баг</option>
+            <option value="question">Вопрос</option>
+            <option value="suggestion">Предложение</option>
+            <option value="review">Отзыв</option>
+            <option value="other">Другое</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Описание:</label>
+          <textarea class="form-textarea" id="description" required placeholder="Подробно опишите проблему или вопрос..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ссылка на скриншоты / логи:</label>
+          <input type="url" class="form-input" id="link" placeholder="https://imgur.com/... или https://pastebin.com/...">
+        </div>
+        <button type="submit" class="submit-button" id="submitBtn">Отправить форму</button>
+      </form>
+      <div class="success-message" id="successMsg">✅ Форма отправлена! Модераторы скоро свяжутся с вами.</div>
+      <div class="error-message" id="errorMsg">❌ Ошибка отправки. Возможно, Webhook не отвечает. Попробуйте написать вручную.</div>
+    </div>
+  </section>
+
+  <!-- ФУТЕР -->
+  <footer class="metro-footer">
+    <div class="footer-content">
+      <div class="footer-column">
+        <h4>Разработка</h4>
+        <p>Главный разработчик: <strong>zverobob112</strong><br>
+        Дизайнер: <strong>halovandala</strong><br>
+        Тестировка: Команда Coldfire Project<br>
+        Версия: <strong>v14d.21.0f «STORM Studio»</strong></p>
+      </div>
+      <div class="footer-column">
+        <h4>Авторские права</h4>
+        <p>&copy; 2025 Coldfire Project. Все права защищены.<br>
+        Никак не связано с 4A Games, Deep Silver или Mojang.<br>
+        Metro 2033 РП — Постапокалипсис в мире майнкрафта - выживут сильнейшие!</p> 
+      </div>
+      <div class="footer-column">
+        <h4>Связь</h4>
+        <p>Discord: <a href="https://discord.gg/42n9vkRX37" target="_blank">https://discord.gg/42n9vkRX37</a><br>
+        Телеграм: <a href="https://t.me/coldfire2033" target="_blank">https://t.me/coldfire2033</a><br>
+        <a href="index.html" style="color: var(--accent); text-decoration: underline;">На главную</a></p>
+        <a href="https://kitaygorod.hgweb.ru/" style="color: var(--accent); text-decoration: underline;">Фракция Китай-город</a></p>
+      </div>
+    </div>
+    <div class="copyright">
+      Сайт создан STORM Studio при поддержке информационных источников самой игры Метро 2033.
+    </div>
+  </footer>
+
+  <script>
+    // === ПОЛНЫЙ, АТМОСФЕРНЫЙ КОНТЕНТ ===
+    const contentData = {
+      "getting-started": {
+        "install": `
+          <div class="article">
+            <h2>Установка модпака</h2>
+            <p>Чтобы начать своё путешествие по метро, следуйте инструкции:</p>
+            <ol>
+              <li>Убедитесь, что у вас установлен <strong>Java 17</strong> (скачать можно с <a href="https://adoptium.net/" target="_blank">adoptium.net</a>).</li>
+              <li>Скачайте и установите <strong>CurseForge</strong> или <strong>Modrinth</strong>.</li>
+              <li>В поиске найдите <em>Coldfire Project</em>.</li>
+              <li>Нажмите «Установить» и дождитесь завершения.</li>
+              <li>Запустите игру через лаунчер.</li>
+            </ol>
+            <p>⚠️ <strong>Важно:</strong> Не используйте другие модпаки одновременно — возможны конфликты.</p>
+            <p>💡 Если игра не запускается — проверьте выделенную оперативную память (минимум 4 ГБ).</p>
+          </div>
+        `,
+        "first-steps": `
+          <div class="article">
+            <h2>Первые шаги</h2>
+            <p>Вы очнулись на станции «Проспект Мира». Вокруг — сумрак, шепот и запах ржавчины. Что делать?</p>
+            <ul>
+              <li><strong>Не выходите на поверхность</strong> — радиация убьёт за минуты.</li>
+              <li>Найдите торговца <em>Сидоровича</em> — он продаст фильтр и фонарь.</li>
+              <li>Собирайте <em>хлам</em> — из него можно создать оружие и инструменты.</li>
+              <li>Говорите со всеми NPC — даже с теми, кто молчит. Иногда они дают задания.</li>
+            </ul>
+            <p>🔔 <strong>Совет выжившего:</strong> Первую ночь лучше провести в укрытии. Мутанты активны в темноте.</p>
+          </div>
+        `,
+        "survival": `
+          <div class="article">
+            <h2>Выживание в метро</h2>
+            <p>Метро — не дом, а тюрьма, где каждый день — борьба. Три главных угрозы:</p>
+            <ol>
+              <li><strong>Радиация</strong> — без фильтра вы не протянете и 5 минут на поверхности.</li>
+              <li><strong>Голод и жажда</strong> — шкалы уменьшаются со временем. Носите консервы и фляжки.</li>
+              <li><strong>Мутанты</strong> — избегайте тоннелей без оружия. Особенно ночью.</li>
+            </ol>
+            <p>🛡️ Всегда имейте при себе: аптечку, антирад, запасной фильтр и оружие.</p>
+            <p>💀 Смерть = потеря части инвентаря. Не рискуйте без необходимости.</p>
+          </div>
+        `,
+        "controls": `
+          <div class="article">
+            <h2>Управление</h2>
+            <p>Стандартные клавиши (можно изменить в настройках):</p>
+            <ul>
+              <li><strong>WASD</strong> — движение</li>
+              <li><strong>ЛКМ</strong> — атака / копать блоки</li>
+              <li><strong>ПКМ</strong> — поставить блок / взаимодействие с объектами</li>
+              <li><strong>Shift</strong> — присесть (тихий ход, меньше шума)</li>
+              <li><strong>Space</strong> — прыжок</li>
+              <li><strong>E</strong> — открыть инвентарь</li>
+              <li><strong>F</strong> — включить/выключить фонарь</li>
+              <li><strong>T</strong> — открыть чат</li>
+            </ul>
+            <p>💡 Совет: приседание снижает шанс обнаружения мутантами.</p>
+          </div>
+        `
+      },
+      "weapons": {
+        "handmade": `
+          <div class="article">
+            <h2>Самодельное оружие</h2>
+            <p>Первое, что вы сможете создать — оружие из хлама. Слабое, но лучше, чем кулаки.</p>
+            <ul>
+              <li><strong>Кастет</strong> — ближний бой, быстро наносит урон.</li>
+              <li><strong>Самопал</strong> — однозарядный пистолет. Требует патроны 9x18.</li>
+              <li><strong>Граната</strong> — взрывчатка. Опасна для вас и врагов.</li>
+            </ul>
+            <p>🔧 Крафт: на обычном верстаке. Рецепты даёт механик на станции.</p>
+            <p>⚠️ Самопал часто даёт осечки — не полагайтесь на него в бою с мутантами.</p>
+          </div>
+        `,
+        "military": `
+          <div class="article">
+            <h2>Армейское оружие</h2>
+            <p>Настоящая сила. Находится в военных арсеналах или у торговцев Красной Линии.</p>
+            <ul>
+              <li><strong>АК-74</strong> — надёжный автомат. Патроны: 5.45x39.</li>
+              <li><strong>СВД</strong> — снайперская винтовка. Убивает с одного выстрела.</li>
+              <li><strong>ПП-19 «Бизон»</strong> — высокая скорострельность, идеален в тоннелях.</li>
+            </ul>
+            <p>⚠️ Требуется хорошая выносливость — иначе будете падать после трёх выстрелов.</p>
+            <p>📍 Арсеналы помечены на карте красным крестом.</p>
+          </div>
+        `,
+        "ammo": `
+          <div class="article">
+            <h2>Боеприпасы</h2>
+            <p>Без патронов — никуда. Типы боеприпасов:</p>
+            <ul>
+              <li><strong>9x18</strong> — для самопала. Крафт: металл + порох.</li>
+              <li><strong>5.45x39</strong> — для АК-74. Находится в арсеналах.</li>
+              <li><strong>7.62x54</strong> — для СВД. Очень редкий.</li>
+            </ul>
+            <p>💡 Совет: патроны — универсальная валюта. Торговцы принимают их в обмен на товары.</p>
+            <p>📌 Запасайтесь — в бою расход высокий, особенно против Носорогов.</p>
+          </div>
+        `,
+        "mods": `
+          <div class="article">
+            <h2>Модификации оружия</h2>
+            <p>Улучшайте оружие на военном верстаке:</p>
+            <ul>
+              <li><strong>Глушитель</strong> — снижает шум выстрела (меньше шанса привлечь мутантов).</li>
+              <li><strong>Оптический прицел</strong> — +20% к точности на дистанции.</li>
+              <li><strong>Увеличенный магазин</strong> — больше патронов без перезарядки.</li>
+            </ul>
+            <p>🔧 Требуется: детали, инструменты и репутация с фракцией.</p>
+            <p>⚠️ Не все модификации совместимы между собой.</p>
+          </div>
+        `
+      },
+      "factions": {
+        "hanza": `
+          <div class="article">
+            <h2>Ганза</h2>
+            <p>Коммерческая фракция, контролирующая торговые пути между станциями.</p>
+            <ul>
+              <li><strong>Дружелюбны</strong> к новичкам и нейтралам.</li>
+              <li>Продают: еду, воду, оружие, броню, фильтры.</li>
+              <li>Задания: доставка товаров, охрана караванов, разведка.</li>
+              <li>Репутация = скидки и доступ к эксклюзивным товарам.</li>
+            </ul>
+            <p>📍 Основные станции: Проспект Мира, Алексеевская.</p>
+            <p>💰 Валюта: марки Ганзы и патроны.</p>
+            <h2>Более подробное описание смотрите на специализированном сайте фракций.</h2>
+          </div>
+        `,
+        "red-line": `
+          <div class="article">
+            <h2>Красная Линия</h2>
+            <p>Военная диктатура, стремящаяся к власти над всем метро.</p>
+            <ul>
+              <li><strong>Строгие правила</strong>: нейтралитет = вражда.</li>
+              <li>Продают: мощное оружие, боеприпасы, военную броню.</li>
+              <li>Задания: убийства, захват станций, разведка.</li>
+              <li>Нарушение правил = немедленный бан на сервере.</li>
+            </ul>
+            <p>📍 Основные станции: Рижская, Сухаревская.</p>
+            <p>⚔️ Не вступайте в конфликт без подготовки — их патрули сильны.</p>
+            <h2>Более подробное описание смотрите на специализированном сайте фракций.</h2>
+          </div>
+        `,
+        "nomads": `
+          <div class="article">
+            <h2>Китай-город</h2>
+            <p>Китай-город — одна из самых загадочных и изолированных станций метро. Расположена в центре Москвы, под историческим районом того же названия. Станция выжила благодаря строгой самоизоляции и уникальной системе фильтрации воздуха.</p>
+            <ul>
+              <li><strong>Нейтралитет</strong> — жители избегают конфликтов с Ганзой и Красной Линией.</li>
+              <li><strong>Торговля</strong> — продают редкие медикаменты, чистую воду и карты поверхности.</li>
+              <li><strong>Задания</strong> — разведка, доставка грузов, поиск выживших в центре города.</li>
+            </ul>
+            <p>⚠️ Доступ на станцию ограничен. Чтобы попасть внутрь, нужно пройти проверку у охраны или иметь рекомендацию от доверенного лица.</p>
+            <p>🔍 Слухи гласят, что именно здесь хранятся архивы довоенного времени — но никто не знает, правда это или нет.</p>
+            <h2>Более подробное описание смотрите на специализированном сайте фракций.</h2>
+          </div>
+        `,
+        "neutral": `
+          <div class="article">
+            <h2>Полис</h2>
+            <p>
+              Самая могущественная фракция Московского метро, центр науки, культуры и военной силы. <br>
+              Полис расположен на стыке трёх станций и считается "сердцем метро" – здесь хранятся знания допотопной цивилизации, работают лучшие учёные и существует строгая иерархия.
+            </p>
+            <ul>
+              <li>Контролирует ключевые ресурсы, книги, лекарства и технологии.</li>
+              <li>Военная стража способна отразить любую атаку мутантов или враждебных фракций.</li>
+              <li>Является нейтральной стороной в конфликтах между Красной Линией и Рейхом, выступая гарантом мира.</li>
+              <li>Только избранным разрешено жить или работать здесь; простым обитателям метро попасть в Полис крайне сложно.</li>
+              <li>Могут предоставить помощь, лекарства, доступ к информации или задания – часто за плату или услуги.</li>
+            </ul>
+            <p>💬 В Полисе всегда есть шанс получить редкие сведения или важное задание — общайтесь с жителями, особенно с учёными и военными.</p>
+            <p>💡 Совет: мутантские артефакты здесь ценят высоко; обменяйте их на боеприпасы, лекарства или редкое оборудование.</p>
+            <h2>Более подробное описание смотрите на специализированном сайте фракций.</h2>
+          </div>
+        `,
+        "nazi": `
+          <div class="article">
+            <h2>Четвёртый рейх</h2>
+            <p>
+              Экстремистская фракция, опирающаяся на идеи тоталитаризма и расового превосходства. Контролирует несколько станций метро, отличается жёсткой военной дисциплиной и идеологией.
+            </p>
+            <ul>
+              <li>Враждебно настроен к чужакам, особенно к "нечистым" по их понятиям.</li>
+              <li>Строгая иерархия: солдаты рейха — фанатично преданные бойцы, готовые защищать свои идеалы любой ценой.</li>
+              <li>Торговля с ними возможна только при наличии доверия или нужных связей; случайных людей часто задерживают или атакуют.</li>
+              <li>Иногда могут дать задания по диверсиям или поиску "врагов фракции".</li>
+              <li>Обитатели рейха редко делятся секретами, но знающие смогли бы найти полезные сведения о передвижениях врагов.</li>
+            </ul>
+            <p>💬 Рейх ценит решительность и силу — говорить нужно осторожно, чтобы не вызвать подозрений.</p>
+            <p>💡 Совет: чтобы обменять трофеи или ресурсы, подыскивайте "белую" форму или заручитесь поддержкой посредников.</p>
+            <h2>Более подробное описание смотрите на специализированном сайте фракций.</h2>
+          </div>
+        `,
+        "vdnh": `
+          <div class="article">
+            <h2>ВДНХ</h2>
+            <p>
+              Одна из самых небольших и скромных станций — родина Артёма, главного героя. Жители ВДНХ ведут упорную оборону против мутантов, сплочены и весьма доброжелательны к гостям.
+            </p>
+            <ul>
+              <li>Здесь редко бывают крупные торговцы — обмен идёт в основном на лекарства, еду и патроны.</li>
+              <li>Внешние угрозы и нападения мутантов сделали жителей взаимовырученными и храбрыми.</li>
+              <li>Могут предложить помощь, приют или простые задания, связанные с обороной и разведкой.</li>
+              <li>Иногда можно узнать о секретных проходах и способах попасть к другим фракциям или тайникам.</li>
+              <li>Открыты для общения, особенно если вы знаете или помогли местным.</li>
+            </ul>
+            <p>💬 Говорите с местными охотниками — они часто слышат новости из других частей метро.</p>
+            <p>💡 Совет: мутантские части здесь менее ценны, чем патроны и чистая вода, но могут пригодиться мастерам-ремонтникам.</p>
+            <h2>Более подробное описание смотрите на специализированном сайте фракций.</h2>
+          </div>
+        `
+
+      },
+      "crafting": {
+        "tools": `
+          <div class="article">
+            <h2>Инструменты</h2>
+            <p>Без инструментов — никуда. Создаются на верстаке:</p>
+            <ul>
+              <li><strong>Кирка</strong> — для добычи руды и камня.</li>
+              <li><strong>Лопата</strong> — для рытья тоннелей и уборки завалов.</li>
+              <li><strong>Топор</strong> — для рубки деревянных конструкций.</li>
+            </ul>
+            <p>🔧 Улучшайте инструменты у механика — они станут прочнее и эффективнее.</p>
+            <p>⚠️ Сломанный инструмент нельзя починить — только создать новый.</p>
+          </div>
+        `,
+        "armor": `
+          <div class="article">
+            <h2>Броня</h2>
+            <p>Типы брони:</p>
+            <ul>
+              <li><strong>Кожаная</strong> — базовая защита. Делается из ткани.</li>
+              <li><strong>Железная</strong> — средняя защита. Требует металл.</li>
+              <li><strong>Броня Ханзы</strong> — элитная. Даёт бонус к репутации.</li>
+            </ul>
+            <p>🛡️ Ремонт: на верстаке с помощью ткани и металла.</p>
+            <p>💀 Без брони урон от мутантов увеличивается на 50%.</p>
+          </div>
+        `,
+        "items": `
+          <div class="article">
+            <h2>Предметы выживания</h2>
+            <p>Спасут жизнь в критической ситуации:</p>
+            <ul>
+              <li><strong>Аптечка</strong> — лечит раны (восстанавливает здоровье).</li>
+              <li><strong>Антирад</strong> — нейтрализует радиацию в организме.</li>
+              <li><strong>Фильтр</strong> — защищает от радиации на поверхности (5 минут).</li>
+              <li><strong>Фонарь</strong> — освещает тоннели. Батарейки можно заменить.</li>
+            </ul>
+            <p>🎒 Всегда носите минимум по 3 единицы каждого.</p>
+            <p>⚠️ Фильтр одноразовый — не забудьте запас!</p>
+          </div>
+        `,
+        "stations": `
+          <div class="article">
+            <h2>Верстаки</h2>
+            <p>Крафт доступен только на станциях с верстаками:</p>
+            <ul>
+              <li><strong>Обычный верстак</strong> — инструменты, самодельное оружие.</li>
+              <li><strong>Военный верстак</strong> — модификации, армейское оружие.</li>
+              <li><strong>Медицинский верстак</strong> — аптечки, антирад.</li>
+            </ul>
+            <p>📍 Ищите верстаки на крупных станциях. Маленькие станции их не имеют.</p>
+            <p>💡 Совет: некоторые верстаки требуют репутации с фракцией.</p>
+          </div>
+        `
+      },
+      "bugs": {
+        "crash": `
+          <div class="article">
+            <h2>Краши</h2>
+            <p>Если игра вылетает — выполните следующие шаги:</p>
+            <ol>
+              <li>Проверьте логи: папка <code>.minecraft/logs/latest.log</code>.</li>
+              <li>Обновите драйверы видеокарты до последней версии.</li>
+              <li>Уменьшите настройки графики (особенно дальность прорисовки).</li>
+              <li>Переустановите модпак через CurseForge.</li>
+            </ol>
+            <p>🛠️ Если ничего не помогло — отправьте логи нам через форму обратной связи.</p>
+            <p>❗ Не отправляйте файлы напрямую — только ссылку на Pastebin.</p>
+          </div>
+        `,
+        "glitches": `
+          <div class="article">
+            <h2>Глитчи</h2>
+            <p>Иногда происходят странные вещи:</p>
+            <ul>
+              <li>NPC проходят сквозь стены.</li>
+              <li>Оружие исчезает после смерти.</li>
+              <li>Звуки не воспроизводятся.</li>
+              <li>Игрок застревает в блоках.</li>
+            </ul>
+            <p>📸 Сделайте скриншот или видео и отправьте в Discord — мы исправим!</p>
+            <p>💡 Временное решение: перезайдите на сервер.</p>
+          </div>
+        `,
+        "fixes": `
+          <div class="article">
+            <h2>Как исправить</h2>
+            <p>Общие решения проблем:</p>
+            <ul>
+              <li>Перезапустите игру.</li>
+              <li>Удалите конфликтующие моды (оставьте только Coldfire Project).</li>
+              <li>Обновите Java до версии 17.</li>
+              <li>Проверьте целостность файлов в CurseForge (кнопка «Repair»).</li>
+            </ul>
+            <p>🔧 Если проблема остаётся — напишите в Discord с описанием и логами.</p>
+          </div>
+        `,
+        "logs": `
+          <div class="article">
+            <h2>Как прислать логи</h2>
+            <p>1. Откройте папку <code>.minecraft/logs</code><br>
+            2. Найдите файл <code>latest.log</code><br>
+            3. Загрузите его на <a href="https://pastebin.com" target="_blank">Pastebin</a><br>
+            4. Скопируйте ссылку и вставьте в форму обратной связи.</p>
+            <p>❗ Не отправляйте файлы через Discord — только ссылку!</p>
+            <p>📌 Логи помогают нам быстро находить и исправлять ошибки.</p>
+          </div>
+        `
+      },
+      "lore": {
+        "stations": `
+          <div class="article">
+            <h2>Станции метро</h2>
+            <p>Каждая станция — отдельный мир:</p>
+            <ul>
+              <li><strong>Проспект Мира</strong> — стартовая, нейтральная, много торговцев.</li>
+              <li><strong>Алексеевская</strong> — под контролем Ханзы, рынок и верфь.</li>
+              <li><strong>Рижская</strong> — Красная Линия, военная база.</li>
+              <li><strong>ВДНХ</strong> — нейтральная, учёные, тайные лаборатории.</li>
+            </ul>
+            <p>🚇 Между станциями — тоннели, полные мутантов и ловушек.</p>
+            <p>⚠️ Не все станции открыты с самого начала — некоторые требуют заданий.</p>
+          </div>
+        `,
+        "mutants": `
+          <div class="article">
+            <h2>Мутанты</h2>
+            <p>Угрозы подземелья:</p>
+            <ul>
+              <li><strong>Носороги</strong> — бронированные, атакуют в ближнем бою.</li>
+              <li><strong>Демон-крысы</strong> — стаи, атакуют ночью.</li>
+              <li><strong>Невидимки</strong> — становятся невидимыми, атакуют из засады.</li>
+              <li><strong>Человек-паук</strong> — лазает по потолку, нападает сверху.</li>
+            </ul>
+            <p>💀 У каждого мутанта — слабое место. Изучайте тактику боя.</p>
+            <p>🔔 Ночью мутанты активнее — не выходите без оружия и фонаря.</p>
+          </div>
+        `,
+        "history": `
+          <div class="article">
+            <h2>История мира</h2>
+            <p>Ядерная война 2013 года уничтожила цивилизацию. Выжившие ушли в метро Москвы. Прошло 20 лет. Радиация, мутанты, фракции — борьба за выживание продолжается.</p>
+            <p>Вы — один из них. Ваша цель: выжить, найти правду и, возможно, спасти тех, кто ещё жив.</p>
+            <p>📜 Лор проекта основан на книгах Дмитрия Глуховского и играх Metro 2033 / Last Light.</p>
+          </div>
+        `
+      },
+      "multiplayer": {
+        "server": `
+          <div class="article">
+            <h2>Подключение к серверу</h2>
+            <p>IP-адрес: <strong>coldfire.mcserver.com</strong><br>
+            Порт: <strong>25565</strong></p>
+            <p>⚠️ Требуется установленный модпак. Без него — кик при подключении.</p>
+            <p>💡 Совет: добавьте сервер в список, чтобы не вводить IP каждый раз.</p>
+            <p>🌐 Сервер работает 24/7. Задержка зависит от вашего региона.</p>
+          </div>
+        `,
+        "rules": `
+          <div class="article">
+            <h2>Правила сервера</h2>
+            <ul>
+              <li>Запрещён griefing (уничтожение чужих построек).</li>
+              <li>Запрещена реклама сторонних проектов.</li>
+              <li>Уважение к другим игрокам — основа сообщества.</li>
+              <li>PvP разрешён только в зонах враждебных фракций.</li>
+              <li>Использование читов = перманентный бан.</li>
+            </ul>
+            <p>👮 Нарушение правил — жалобы в Discord. Админы проверяют ежедневно.</p>
+          </div>
+        `,
+        "pvp": `
+          <div class="article">
+            <h2>PvP и рейды</h2>
+            <p>Рейды разрешены только на станциях враждебных фракций:</p>
+            <ul>
+              <li>Используйте тактику: засады, дымовые шашки, отвлекающие манёвры.</li>
+              <li>Не трогайте нейтральные станции — это нарушение.</li>
+              <li>После смерти — штраф репутации и потеря части инвентаря.</li>
+            </ul>
+            <p>⚔️ Честная игра — основа баланса. Не злоупотребляйте численным превосходством.</p>
+          </div>
+        `
+      },
+      "updates": {
+        "changelog": `
+          <div class="article">
+            <h2>Список изменений (v1.2.0 «Тени метро»)</h2>
+            <ul>
+              <li>Добавлены новые мутанты: Невидимки и Человек-паук.</li>
+              <li>Исправлены краши при загрузке крупных станций.</li>
+              <li>Улучшена система радиации — теперь реалистичнее.</li>
+              <li>Добавлены 3 новых задания от Кочевников.</li>
+              <li>Оптимизация производительности (FPS +15% на слабых ПК).</li>
+              <li>Новые текстуры для оружия и брони.</li>
+            </ul>
+            <p>📥 Обновление доступно в CurseForge и Modrinth.</p>
+          </div>
+        `,
+        "roadmap": `
+          <div class="article">
+            <h2>Планы развития</h2>
+            <p>Ближайшие цели (Q3 2025):</p>
+            <ul>
+              <li>Новые станции: Тимирязевская, Ботанический сад.</li>
+              <li>Система кланов и союзов между игроками.</li>
+              <li>Погодные эффекты на поверхности (дождь, туман).</li>
+              <li>Мобильный компаньон — питомец, который носит вещи.</li>
+              <li>Сюжетная кампания (одиночная игра).</li>
+            </ul>
+            <p>💡 Ваши предложения влияют на roadmap! Пишите в Discord.</p>
+          </div>
+        `
+      },
+      "faq": {
+        "performance": `
+          <div class="article">
+            <h2>Низкий FPS</h2>
+            <p>Модпак требователен к железу. Решения:</p>
+            <ul>
+              <li>Уменьшите дальность прорисовки до 8-12 чанков.</li>
+              <li>Отключите частицы и анимации в настройках.</li>
+              <li>Используйте OptiFine или Sodium (разрешено).</li>
+              <li>Закройте фоновые приложения (браузер, Discord и т.д.).</li>
+              <li>Выделите больше ОЗУ в лаунчере (минимум 4 ГБ).</li>
+            </ul>
+            <p>🖥️ Минимальные требования: i5-4460, GTX 960, 8 ГБ ОЗУ.</p>
+          </div>
+        `,
+        "mods": `
+          <div class="article">
+            <h2>Совместимость модов</h2>
+            <p>Разрешены (не вызывают конфликтов):</p>
+            <ul>
+              <li>OptiFine</li>
+              <li>JEI (Just Enough Items)</li>
+              <li>JourneyMap</li>
+              <li>Sodium + Iris</li>
+            </ul>
+            <p>Запрещены (вызовут краш или баги):</p>
+            <ul>
+              <li>Любые моды на оружие/броню</li>
+              <li>Моды, меняющие генерацию мира</li>
+              <li>Моды на магию или технику</li>
+            </ul>
+            <p>⚠️ При использовании запрещённых модов — кик с сервера.</p>
+          </div>
+        `,
+        "save": `
+          <div class="article">
+            <h2>Пропал сохран</h2>
+            <p>Причины:</p>
+            <ul>
+              <li>Игра закрыта аварийно (краш, выключение ПК).</li>
+              <li>Недостаточно места на диске.</li>
+              <li>Конфликт модов.</li>
+            </ul>
+            <p>Решение:</p>
+            <ul>
+              <li>Проверьте папку <code>.minecraft/saves</code>.</li>
+              <li>Если папка есть, но игра не грузится — удалите файл <code>session.lock</code>.</li>
+              <li>Если папки нет — начните заново. Резервные копии не создаются автоматически.</li>
+            </ul>
+            <p>💡 Совет: делайте бэкапы вручную раз в неделю.</p>
+          </div>
+        `
+      },
+      "community": {
+        "events": `
+          <div class="article">
+            <h2>Ивенты</h2>
+            <p>Каждую субботу в 20:00 по МСК:</p>
+            <ul>
+              <li><strong>Рейд на станцию Красной Линии</strong> — командное задание.</li>
+              <li><strong>Торговая ярмарка</strong> на Проспекте Мира — обмен ресурсами.</li>
+              <li><strong>Конкурс на лучший скриншот</strong> — призы от команды.</li>
+            </ul>
+            <p>📢 Анонсы — в Discord, канал #ивенты.</p>
+            <p>🎁 Участие = уникальные предметы и репутация.</p>
+          </div>
+        `,
+        "contests": `
+          <div class="article">
+            <h2>Конкурсы</h2>
+            <p>Текущий конкурс: <strong>«Лучший бункер»</strong></p>
+            <p>Условия:</p>
+            <ul>
+              <li>Постройте убежище на нейтральной станции.</li>
+              <li>Сделайте скриншот с описанием.</li>
+              <li>Отправьте в Discord, канал #конкурсы.</li>
+            </ul>
+            <p>Призы:</p>
+            <ul>
+              <li>Эксклюзивная броня «Выживший»</li>
+              <li>1000 патронов</li>
+              <li>Роль «Строитель» на сервере</li>
+            </ul>
+            <p>⏳ Конкурс до 30 июня 2025.</p>
+          </div>
+        `,
+        "guides": `
+          <div class="article">
+            <h2>Гайды игроков</h2>
+            <p>Лучшие гайды от сообщества:</p>
+            <ul>
+              <li>«Как выжить первую неделю» — от игрока MetroRat</li>
+              <li>«Где найти военное оружие» — от игрока Sniper_19</li>
+              <li>«Тайники Ханзы» — от игрока TraderJoe</li>
+              <li>«Тактика против Носорогов» — от игрока BeastSlayer</li>
+            </ul>
+            <p>📚 Читайте в Discord, канал #гайды.</p>
+            <p>💡 Хотите опубликовать свой гайд? Напишите модератору.</p>
+          </div>
+        `
+      },
+      "advanced": {
+        "radiation": `
+          <div class="article">
+            <h2>Радиация</h2>
+            <p>Уровни радиации:</p>
+            <ul>
+              <li><strong>Низкий</strong> — фильтр защищает 5 минут.</li>
+              <li><strong>Средний</strong> — фильтр + антирад (иначе урон).</li>
+              <li><strong>Высокий</strong> — только скафандр (редкий предмет).</li>
+            </ul>
+            <p>⚠️ Без защиты:</p>
+            <ul>
+              <li>Низкий уровень — урон каждые 10 сек.</li>
+              <li>Средний — урон каждые 5 сек.</li>
+              <li>Высокий — смерть за 30 сек.</li>
+            </ul>
+            <p>📍 Зоны высокой радиации помечены на карте красным.</p>
+          </div>
+        `,
+        "hunger": `
+          <div class="article">
+            <h2>Голод и жажда</h2>
+            <p>Шкалы уменьшаются со временем:</p>
+            <ul>
+              <li><strong>Еда</strong>: консервы, мясо, хлеб, грибы.</li>
+              <li><strong>Вода</strong>: фляжки, канистры, очищенная вода.</li>
+            </ul>
+            <p>При 0:</p>
+            <ul>
+              <li>Голод — урон каждые 5 сек.</li>
+              <li>Жажда — урон каждые 7 сек.</li>
+            </ul>
+            <p>🎒 Носите запас: минимум 10 единиц еды и 5 воды.</p>
+            <p>💡 Совет: грибы можно найти в тоннелях, но некоторые ядовиты.</p>
+          </div>
+        `,
+        "morale": `
+          <div class="article">
+            <h2>Мораль</h2>
+            <p>Новый механик! Мораль влияет на:</p>
+            <ul>
+              <li>Цены у торговцев (высокая мораль = скидки).</li>
+              <li>Поведение NPC (могут дать бонус).</li>
+              <li>Шанс критического урона (+10% при высокой морали).</li>
+            </ul>
+            <p>Как повысить:</p>
+            <ul>
+              <li>Помогайте другим игрокам.</li>
+              <li>Выполняйте задания без убийств невинных.</li>
+              <li>Спасайте пленных.</li>
+            </ul>
+            <p>💀 Убийство нейтральных NPC = падение морали.</p>
+          </div>
+        `
+      },
+      "trading": {
+        "currency": `
+          <div class="article">
+            <h2>Валюта</h2>
+            <p>Типы денег:</p>
+            <ul>
+              <li><strong>Патроны</strong> — универсальная валюта. Принимают все.</li>
+              <li><strong>Золотые кольца</strong> — редкие, нужны для эксклюзивных товаров.</li>
+              <li><strong>Марки Ханзы</strong> — только на станциях Ханзы.</li>
+            </ul>
+            <p>⚠️ Не теряйте валюту — после смерти она частично пропадает.</p>
+            <p>💡 Совет: патроны можно найти в сундуках и на трупах.</p>
+          </div>
+        `,
+        "traders": `
+          <div class="article">
+            <h2>Торговцы</h2>
+            <p>Основные торговцы:</p>
+            <ul>
+              <li><strong>Сидорович</strong> (Проспект Мира) — всё понемногу.</li>
+              <li><strong>Барыга</strong> (ВДНХ) — чёрный рынок, редкие предметы.</li>
+              <li><strong>Армейский торговец</strong> (Рижская) — оружие и броня.</li>
+              <li><strong>Медбрат</strong> (Алексеевская) — аптечки и антирад.</li>
+            </ul>
+            <p>💰 Цены зависят от вашей репутации и морали.</p>
+            <p>📍 Ищите иконку «торговец» на карте.</p>
+          </div>
+        `,
+        "barter": `
+          <div class="article">
+            <h2>Бартер</h2>
+            <p>Можно обменивать без денег:</p>
+            <ul>
+              <li>Хлам → патроны</li>
+              <li>Мутантские части → аптечки</li>
+              <li>Артефакты → редкое оружие</li>
+              <li>Ткань → фильтры</li>
+            </ul>
+            <p>🔄 Бартер доступен у торговцев с иконкой «обмен».</p>
+            <p>💡 Совет: мутантские части можно найти на трупах мутантов.</p>
+          </div>
+        `
+      }
+    };
+
+    // === ПОИСК С АНИМАЦИЕЙ ===
+    const searchInput = document.getElementById('searchInput');
+    const categoriesList = document.getElementById('categoriesList');
+    const mainContent = document.getElementById('mainContent');
+
+    searchInput.addEventListener('input', () => {
+      const query = searchInput.value.trim().toLowerCase();
+      if (!query) {
+        document.querySelectorAll('.category').forEach(cat => {
+          cat.style.display = '';
+          const subs = cat.querySelector('.subcategories');
+          if (subs) subs.style.display = 'none';
+        });
+        return;
+      }
+
+      let hasResults = false;
+
+      document.querySelectorAll('.category').forEach(category => {
+        const categoryTitle = category.querySelector('span').textContent.toLowerCase();
+        const subItems = category.querySelectorAll('.subcategories li');
+        let categoryMatch = categoryTitle.includes(query);
+        let matchedSubs = [];
+
+        subItems.forEach(sub => {
+          const subText = sub.textContent.toLowerCase();
+          if (subText.includes(query)) {
+            matchedSubs.push(sub);
+            hasResults = true;
+          }
+        });
+
+        if (categoryMatch || matchedSubs.length > 0) {
+          category.style.display = 'block';
+          subItems.forEach(sub => {
+            sub.style.display = (matchedSubs.includes(sub) || categoryMatch) ? 'block' : 'none';
+          });
+          const subList = category.querySelector('.subcategories');
+          if (subList) subList.style.display = 'block';
+        } else {
+          category.style.display = 'none';
+        }
+      });
+
+      if (!hasResults) {
+        mainContent.innerHTML = `
+          <div class="content-placeholder">
+            <h2>Ничего не найдено</h2>
+            <p>Попробуйте другие ключевые слова: «патроны», «фильтр», «Ханза», «радиация».</p>
+          </div>
+        `;
+      }
+    });
+
+    // === НАВИГАЦИЯ ===
+    document.querySelectorAll('.category > span').forEach(span => {
+      span.addEventListener('click', () => {
+        const sub = span.nextElementSibling;
+        if (sub) {
+          sub.style.display = sub.style.display === 'block' ? 'none' : 'block';
+        }
+      });
+    });
+
+    document.querySelectorAll('.subcategories li').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.subcategories li').forEach(li => li.classList.remove('active'));
+        item.classList.add('active');
+        const cat = item.closest('.category').dataset.category;
+        const sec = item.dataset.section;
+        mainContent.innerHTML = contentData[cat] && contentData[cat][sec] 
+          ? contentData[cat][sec] 
+          : `<div class="article"><h2>Контент временно недоступен</h2><p>Раздел находится в разработке.</p></div>`;
+      });
+    });
+
+    // === ФОРМА ОБРАТНОЙ СВЯЗИ ===
+    document.getElementById('supportForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      const success = document.getElementById('successMsg');
+      const error = document.getElementById('errorMsg');
+      
+      btn.disabled = true;
+      success.style.display = 'none';
+      error.style.display = 'none';
+
+      const playerName = document.getElementById('playerName').value;
+      const discordId = document.getElementById('discordId').value.trim();
+      const topic = document.getElementById('topic').value;
+      const description = document.getElementById('description').value;
+      const link = document.getElementById('link').value || 'Не указано';
+
+      let topicText = {bug: 'Баг', question: 'Вопрос', suggestion: 'Предложение', review: 'Отзыв', other: 'Другое'}[topic] || 'Неизвестно';
+
+      // Формируем упоминание
+      let mention = '';
+      if (discordId && /^\d{17,20}$/.test(discordId)) {
+        mention = `<@${discordId}>`;
+      } else if (discordId) {
+        mention = discordId;
+      }
+
+      const embed = {
+        username: "Coldfire project Premium",
+        avatar_url: "https://cdn.discordapp.com/attachments/1384913420322603129/1422168141315969074/new_ava2033.gif?ex=68dbb0cb&is=68da5f4b&hm=f1730a8e2f2ab0a7204cf8a71b85586725397b88a53bea7aa0b72f8638c2a7f8&",
+        embeds: [{
+          title: "🔔 Новое обращение в поддержку",
+          color: 0x39FF14,
+          fields: [
+            { name: "👤 Игрок", value: playerName, inline: true },
+            { name: "📌 Тема", value: topicText, inline: true },
+            { name: "💬 Discord", value: mention || "Не указан", inline: true },
+            { name: "📝 Описание", value: description.substring(0, 1024) },
+            { name: "📎 Ссылка", value: link }
+          ],
+          footer: { text: "Coldfire Project • Поддержка игроков" },
+          timestamp: new Date().toISOString()
+        }]
+      };
+
+      try {
+        // 🔑 ЗАМЕНИ ЭТОТ URL НА СВОЙ DISCORD WEBHOOK!
+        const webhookUrl = 'https://discord.com/api/webhooks/1421821529037213838/F0igeHTjh5EhnMCNVnxXagqSQhm1INU58nuNszoR3yMmh3U1vOpO4qFY1kKSfxWGLXyp';
+        const res = await fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(embed)
+        });
+
+        if (res.ok) {
+          success.style.display = 'block';
+          document.getElementById('supportForm').reset();
+        } else {
+          throw new Error('Webhook error');
+        }
+      } catch (err) {
+        console.error(err);
+        error.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+
+  <script>
+    // Блокировка страницы поддержки для забаненных пользователей
+    (function(){
+      function renderBanOverlay(userObj){
+        // Прячем основной UI
+        const container = document.querySelector('.container');
+        const feedback = document.querySelector('.feedback-section');
+        if (container) container.style.display = 'none';
+        if (feedback) feedback.style.display = 'none';
+
+        // Удаляем чат-интерфейс, если открыт
+        const chatInterface = document.getElementById('chatInterface');
+        if (chatInterface) chatInterface.remove();
+
+        // Рисуем сообщение
+        let overlay = document.getElementById('banOverlay');
+        if (!overlay){
+          overlay = document.createElement('div');
+          overlay.id = 'banOverlay';
+          overlay.style.position = 'fixed';
+          overlay.style.inset = '0';
+          overlay.style.display = 'flex';
+          overlay.style.alignItems = 'center';
+          overlay.style.justifyContent = 'center';
+          overlay.style.background = 'rgba(0,0,0,0.85)';
+          overlay.style.zIndex = '2000';
+          document.body.appendChild(overlay);
+        }
+        const tillText = (userObj && userObj.ban && userObj.ban.until) ? new Date(userObj.ban.until).toLocaleString('ru-RU') : 'бессрочно';
+        const reason = (userObj && userObj.ban && userObj.ban.reason) ? userObj.ban.reason : 'Не указана';
+        overlay.innerHTML = `
+          <div style="max-width:700px;width:90%;padding:24px;border:3px solid var(--metro-accent-red);background:rgba(10,10,20,0.95);border-radius:10px;box-shadow:0 0 30px rgba(231,76,60,0.5);text-align:center;">
+            <h2 style="color:var(--metro-accent-red);margin-bottom:12px;">ДОСТУП ЗАБЛОКИРОВАН</h2>
+            <p style="margin-bottom:8px;">Ваш аккаунт заблокирован.</p>
+            <p style="margin-bottom:8px;"><strong>До:</strong> ${tillText}</p>
+            <p style="margin-bottom:16px;"><strong>Причина:</strong> ${reason}</p>
+            <button onclick="window.location.href='index.html'" class="metro-button" style="border:2px solid var(--metro-accent-red);padding:10px 16px;color:var(--metro-accent-red);background:transparent;border-radius:6px;">На главную</button>
+          </div>
+        `;
+      }
+
+      function checkBan(){
+        try{
+          const session = localStorage.getItem('metro2033_session');
+          if (!session) return; // Не авторизован — общая страница доступна
+          const s = JSON.parse(session);
+          const users = JSON.parse(localStorage.getItem('metro2033_users')) || {};
+          const u = users[(s.username||'').toLowerCase()];
+          if (u && u.ban && u.ban.isBanned){
+            const until = u.ban.until ? new Date(u.ban.until).getTime() : null;
+            const now = Date.now();
+            if (!until || now < until){
+              renderBanOverlay(u);
+            }
+          }
+        }catch(e){/* noop */}
+      }
+
+      if (document.readyState === 'loading'){
+        document.addEventListener('DOMContentLoaded', () => setTimeout(checkBan, 50));
+      } else {
+        setTimeout(checkBan, 50);
+      }
+    })();
+  </script>
+
+</body>
+</html>

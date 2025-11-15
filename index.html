@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coldfire Project</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Шрифты -->
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  
+  <!-- Единый стиль Metro 2033 -->
+  <link rel="stylesheet" href="metro2033-unified.css">
+  
+  <!-- Скрипт загрузочной заставки -->
+  <script src="metro2033-loader.js" defer></script>
+  <!-- Скрипт курсора -->
+  <script src="metro2033-cursor.js" defer></script>
+  <!-- Скрипт эффектов -->
+  <script src="metro2033-effects.js" defer></script>
+  <!-- Скрипт авторизации -->
+  <script src="auth-system.js" defer></script>
+  <!-- Скрипт модального окна пользователя -->
+  <script src="user-modal.js" defer></script>
+  <!-- Скрипт системы чатов (серверная версия) -->
+  <script src="chat-system-server.js" defer></script>
+
+  <style>
+    /* Дополнительные стили для index.html */
+    /* --- Глобальные стили --- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #1a202c;
+      color: #ccc;
+      font-family: 'Roboto Mono', monospace;
+      overflow-x: hidden;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    /* Эффект шума */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: url('images/metro_background.gif');
+      opacity: 0.05;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Виньетка (осветлена) */
+    .vignette {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(circle at center, transparent, rgba(0,0,0,0.5) 90%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Фоновое видео */
+    .video-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+      opacity: 0.2;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Курсор */
+    body {
+      cursor: url('images/cursor.png'), auto;
+    }
+
+    /* --- Шапка --- */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 5%;
+      background: linear-gradient(to bottom, rgba(10, 15, 25, 0.8), rgba(20, 25, 35, 0.7));
+      border-bottom: 2px solid #333;
+      border-image: url('images/Скрин_7.png') 30 round;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      background: url('images/logo.png') no-repeat center;
+      background-size: contain;
+      border: 2px solid #444;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(0, 170, 255, 0.4);
+      animation: pulse 2s infinite alternate;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 1.2rem;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }
+
+    /* Кнопки-ссылки в шапке */
+    .nav-button {
+      padding: 0.6rem 1.1rem;
+      background: rgba(30, 40, 60, 0.6);
+      border: 1px solid #444;
+      color: #aaa;
+      font-size: 0.9rem;
+      border-radius: 4px;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-button::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .nav-button:hover::after {
+      left: 100%;
+    }
+
+    .nav-button:hover {
+      background: rgba(50, 70, 100, 0.8);
+      color: #fff;
+      border-color: #00aaff;
+      transform: scale(1.05);
+    }
+
+    /* Кнопки в блоках */
+    .btn-secondary {
+      display: inline-block;
+      padding: 0.6rem 1.2rem;
+      background: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+      background: #27ae60;
+      transform: scale(1.05);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .social-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .social-link {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(30, 40, 60, 0.6);
+      border: 1px solid #444;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .social-link:hover {
+      background: #00aaff;
+      color: #000;
+      transform: scale(1.1);
+    }
+
+    /* --- Основной контейнер --- */
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0;
+      background: rgba(20, 25, 40, 0.8);
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.7),
+                  inset 0 0 20px rgba(0, 0, 0, 0.5);
+      border: 1px solid #333;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeInUp 1s forwards 0.5s;
+    }
+
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .title {
+      text-align: center;
+      padding: 1.8rem 0;
+      color: #00aaff;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px rgba(0, 170, 255, 0.6);
+      border-bottom: 1px solid #333;
+    }
+
+    /* Блоки */
+    .block {
+      background: rgba(25, 30, 45, 0.7);
+      border-radius: 10px;
+      padding: 1.5rem;
+      border: 1px solid #333;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
+      margin-bottom: 2rem;
+      animation: slideUp 0.8s forwards;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .block h2 {
+      color: #00aaff;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 5px rgba(0, 170, 255, 0.5);
+    }
+
+    .block p {
+      color: #ccc;
+      line-height: 1.6;
+    }
+
+    /* Скриншоты */
+    .screenshots-container {
+      position: relative;
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+
+    .screenshots-slider {
+      display: flex;
+      transition: transform 0.5s ease;
+    }
+
+    .screenshot-slide {
+      display: flex;
+      gap: 1rem;
+      min-width: 100%;
+    }
+
+    .screenshot {
+      width: 300px;
+      height: 200px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s ease;
+    }
+
+    .screenshot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .screenshot:hover {
+      transform: scale(1.05);
+    }
+
+    .dots {
+      display: flex;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #444;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .dot.active {
+      background: #00aaff;
+      transform: scale(1.1);
+    }
+
+    /* --- Новости --- */
+    .news {
+      margin-top: 2rem;
+    }
+
+    .news-item {
+      border-bottom: 1px dashed #444;
+      padding: 1.5rem 0;
+    }
+
+    .news-item:last-child {
+      border-bottom: none;
+    }
+
+    .news-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .news-date {
+      color: #888;
+      font-size: 0.8rem;
+    }
+
+    .news-title {
+      color: #00aaff;
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-right: 1rem;
+    }
+
+    .news-toggle {
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #00aaff;
+      transition: transform 0.3s ease;
+      margin-left: 0.5rem;
+    }
+
+    .news-toggle.open {
+      transform: rotate(180deg);
+    }
+
+    .news-body {
+      display: none;
+      margin-top: 1.5rem;
+    }
+
+    .news-body.show {
+      display: block;
+    }
+
+    .news-text {
+      color: #ccc;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Крупные скрины — 3 на строке, по центру */
+    .news-images {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin: 0 auto;
+      max-width: 900px;
+    }
+
+    .news-images img {
+      width: 280px;
+      height: 180px;
+      border-radius: 10px;
+      overflow: hidden;
+      object-fit: cover;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .news-images img:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 15px rgba(0, 170, 255, 0.5);
+    }
+
+    /* Трейлер */
+    .trailer-title {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #00aaff;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: 1px;
+      text-shadow: 0 0 5px rgba(0, 170, 255, 0.6);
+    }
+
+    .trailer-container {
+      display: flex;
+      justify-content: center;
+      margin: 0 auto;
+      max-width: 720px;
+    }
+
+    /* Карта метро */
+    .map-title {
+      text-align: center;
+      margin-bottom: 1.2rem;
+      color: #00aaff;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: 1px;
+      text-shadow: 0 0 5px rgba(0, 170, 255, 0.6);
+    }
+
+    /* Контейнер карты */
+    .map-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto;
+      max-width: 900px;
+      padding: 1rem;
+      border: 1px solid #333;
+      border-radius: 12px;
+      background: rgba(20, 25, 40, 0.6);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      position: relative;
+    }
+
+    #map-image {
+      width: 100%;
+      max-width: 800px;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 170, 255, 0.3);
+      display: block;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+      cursor: grab;
+    }
+
+    #map-image.grabbing {
+      cursor: grabbing;
+    }
+
+    /* Контролы карты — справа */
+    .map-controls {
+      position: absolute;
+      top: 50%;
+      right: 1rem;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      z-index: 10;
+    }
+
+    /* Кнопки управления */
+    .map-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: linear-gradient(to bottom, #eee, #ddd);
+      color: #000;
+      font-size: 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      line-height: 40px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      background-image: url('images/Rust.png'); /* Пятна ржавчины */
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+    }
+
+    .map-btn:hover {
+      background: linear-gradient(to bottom, #ccc, #bbb);
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .map-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Играем */
+    .play-section {
+      background: url('images/Скрин_10.png') no-repeat center;
+      background-size: cover;
+      border-radius: 10px;
+      padding: 2rem;
+      border: 1px solid #333;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
+      color: white;
+      text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+      margin-bottom: 2rem;
+    }
+
+    .play-section h2 {
+      color: #00aaff;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.6rem;
+      margin-bottom: 1rem;
+    }
+
+    .play-section ul {
+      list-style: none;
+      margin: 1rem 0;
+    }
+
+    .play-section li {
+      margin: 0.5rem 0;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+
+    .play-section li::before {
+      content: '✓';
+      color: #00aaff;
+      position: absolute;
+      left: 0;
+    }
+
+    .play-section button {
+      background: #e63946;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .play-section button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Фон терминала */
+    .terminal-bg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #000;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    /* Шум терминала */
+    .terminal-bg::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: url('images/Dev.gif');
+      opacity: 0.1;
+      pointer-events: none;
+    }
+
+    /* Анимация мигания символов */
+    .terminal-bg::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(255, 0, 0, 0.1),
+        rgba(255, 0, 0, 0.1) 1px,
+        rgba(0, 0, 0, 0.1) 1px,
+        rgba(0, 0, 0, 0.1) 2px
+      );
+      animation: glitch 2s infinite alternate;
+      opacity: 0.3;
+    }
+
+    @keyframes glitch {
+      0% { transform: translateX(0); }
+      50% { transform: translateX(-2px); }
+      100% { transform: translateX(0); }
+    }
+
+      /* Текст терминала */
+      .terminal-content {
+        position: relative;
+        color: #00aaff;
+        font-family: 'Roboto Mono', monospace;
+        line-height: 1.8;
+        padding: 2rem;
+        background: rgba(0, 0, 0, 0.7);
+        border: 1px solid #00aaff;
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(0, 170, 255, 0.5);
+        backdrop-filter: blur(2px);
+      }
+
+      .terminal-content h2,
+      .terminal-content h3 {
+        color: #00aaff;
+        margin-top: 1.5rem;
+        text-shadow: 0 0 5px rgba(0, 170, 255, 0.5);
+      }
+
+      .terminal-content p {
+        color: #ccc;
+        margin: 0.5rem 0;
+        animation: typeWrite 0.5s ease-out forwards;
+      }
+
+      @keyframes typeWrite {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+    /* Модальное окно */
+    /* Модальное окно */
+    .modal {
+      display: none; /* По умолчанию скрыто */
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal.active {
+      animation: modalFadeIn 0.4s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      0% { opacity: 0; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-content {
+      background: rgba(15, 20, 30, 0.95);
+      border-radius: 12px;
+      width: 80%;
+      max-width: 900px;
+      padding: 2.5rem;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.5),
+                  0 0 40px rgba(0, 170, 255, 0.2);
+      color: white;
+      position: relative;
+      border: 1px solid #333;
+      backdrop-filter: blur(5px);
+    }
+
+    /* Общее для больших модальных окон */
+    .modal-content.large {
+      max-width: 900px;
+      width: 85%;
+      padding: 2.5rem;
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .modal-content.large h2,
+    .modal-content.large h3 {
+      color: #00aaff;
+      margin-top: 1.5rem;
+    }
+
+    .modal-content.large p,
+    .modal-content.large li {
+      color: #ccc;
+      margin: 0.5rem 0;
+    }
+
+    .ip-btn {
+      background: rgba(0, 170, 255, 0.2);
+      color: #00aaff;
+      border: 1px solid #00aaff;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin: 0.5rem 0;
+      transition: all 0.3s ease;
+      display: inline-block;
+      width: auto;
+    }
+
+    .ip-btn:hover {
+      background: rgba(0, 170, 255, 0.4);
+      transform: scale(1.05);
+    }
+
+    .close {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      font-size: 1.5rem;
+      color: #aaa;
+      cursor: pointer;
+      background: none;
+      border: none;
+      transition: color 0.3s ease;
+    }
+
+    .close:hover {
+      color: #fff;
+    }
+
+    .dev-list, .coords {
+      color: #ccc;
+      line-height: 1.6;
+      margin: 1rem 0;
+    }
+
+    .dev-list p, .coords p {
+      margin: 0.5rem 0;
+    }
+    
+    /* Блоки "Фракции" и "Разработчики" */
+    .links {
+      display: flex;
+      justify-content: space-between;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .link-box {
+      flex: 1;
+      background: rgba(20, 25, 40, 0.7);
+      border-radius: 12px;
+      padding: 2rem;
+      border: 1px solid #333;
+      text-align: center;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      min-width: 300px;
+    }
+
+    .icon-frame {
+      width: 100%;
+      height: 200px; /* Высота — почти вся высота блока */
+      border: 2px solid #00aaff;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto 1.5rem;
+      box-shadow: 0 0 15px rgba(0, 170, 255, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .icon-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* Изображение заполняет всё пространство */
+      max-width: none;
+      max-height: none;
+      transition: transform 0.3s ease;
+    }
+
+    .icon-frame:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 20px rgba(0, 170, 255, 0.5);
+    }
+
+    .icon-frame:hover img {
+      transform: scale(1.05);
+    }
+
+    .link-box h3 {
+      color: #00aaff;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.3rem;
+      margin-bottom: 0.8rem;
+      text-shadow: 0 0 5px rgba(0, 170, 255, 0.5);
+    }
+
+    .link-box p {
+      color: #ccc;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .btn-secondary {
+      background: #2ecc71;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+      background: #27ae60;
+      transform: scale(1.05);
+    }
+
+    .btn-primary {
+      background: #e63946;
+      color: white;
+      border: none;
+      padding: 0.7rem;
+      width: 100%;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin: 1rem 0;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-primary:hover::after {
+      left: 100%;
+    }
+
+    .btn-primary:hover {
+      background: #c1121f;
+      transform: scale(1.02);
+      box-shadow: 0 0 15px rgba(230, 57, 70, 0.5);
+    }
+
+    .year-easter {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3.5rem;
+      color: #00aaff;
+      opacity: 0.5;
+      z-index: 1000;
+      pointer-events: auto;
+      transition: all 0.4s ease;
+      text-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
+      cursor: pointer;
+    }
+
+    .year-easter:hover {
+      opacity: 1;
+      transform: scale(1.05);
+      text-shadow: 0 0 20px rgba(0, 170, 255, 0.8);
+    }
+
+    /* --- Футер --- */
+    footer {
+      margin-top: 3rem;
+      padding: 2rem 5%;
+      background: linear-gradient(to top, #0a0f1a, #151a2a);
+      border-top: 2px solid #333;
+      border-image: url('im') 30 round;
+      text-align: center;
+      color: #888;
+      font-size: 0.85rem;
+      position: relative;
+      box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-left, .footer-right {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .year {
+      position: absolute;
+      bottom: 1rem;
+      right: 2rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3.5rem;
+      color: #00aaff;
+      opacity: 0.5;
+      z-index: 1;
+      pointer-events: none;
+      margin-left: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .year:hover {
+      opacity: 1;
+      transform: scale(1.05);
+      cursor: pointer;
+    }
+
+    /* Модальное окно авторизации */
+    .auth-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(2px);
+    }
+
+    .auth-modal.active {
+      display: flex;
+      animation: modalFadeIn 0.4s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      0% { opacity: 0; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .auth-modal-content {
+      background: rgba(0, 0, 0, 0.95);
+      border: 3px solid var(--metro-accent-red);
+      border-radius: 12px;
+      padding: 3rem;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 
+        0 0 30px rgba(231, 76, 60, 0.5),
+        inset 0 0 30px rgba(0, 0, 0, 0.8);
+      position: relative;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .auth-modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 2rem;
+      color: var(--metro-text-dim);
+      cursor: pointer;
+      background: none;
+      border: none;
+      transition: color 0.3s ease;
+      line-height: 1;
+      z-index: 10;
+    }
+
+    .auth-modal-close:hover {
+      color: var(--metro-accent-red);
+    }
+
+    .auth-title {
+      font-size: 2.5rem;
+      color: var(--metro-accent-red);
+      text-align: center;
+      margin-bottom: 2rem;
+      text-shadow: 0 0 15px rgba(231, 76, 60, 0.8);
+      letter-spacing: 3px;
+      font-family: 'VT323', monospace;
+    }
+
+    .auth-form-group {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .auth-label {
+      display: block;
+      color: var(--metro-terminal-green);
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+      text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+      font-family: 'VT323', monospace;
+    }
+
+    .auth-input, .auth-select {
+      width: 100%;
+      padding: 0.8rem;
+      background: rgba(10, 10, 20, 0.8);
+      border: 2px solid var(--metro-border);
+      border-radius: 6px;
+      color: var(--metro-text);
+      font-family: 'VT323', monospace;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .auth-input:focus, .auth-select:focus {
+      border-color: var(--metro-accent-red);
+      box-shadow: 0 0 15px rgba(231, 76, 60, 0.5);
+      background: rgba(20, 20, 30, 0.9);
+    }
+
+    .auth-input::placeholder {
+      color: rgba(170, 170, 170, 0.5);
+    }
+
+    .auth-btn {
+      width: 100%;
+      padding: 1rem;
+      background: rgba(231, 76, 60, 0.2);
+      border: 2px solid var(--metro-accent-red);
+      color: var(--metro-accent-red);
+      font-family: 'VT323', monospace;
+      font-size: 1.3rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .auth-btn:hover {
+      background: rgba(231, 76, 60, 0.4);
+      box-shadow: 0 0 20px rgba(231, 76, 60, 0.7);
+      transform: scale(1.02);
+    }
+
+    .auth-link {
+      display: block;
+      text-align: center;
+      margin-top: 1.5rem;
+      color: var(--metro-terminal-cyan);
+      text-decoration: none;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .auth-link:hover {
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+      transform: scale(1.05);
+    }
+
+    .auth-error, .auth-success {
+      background: rgba(231, 76, 60, 0.2);
+      border: 2px solid var(--metro-accent-red);
+      color: var(--metro-accent-red);
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1.5rem;
+      display: none;
+      text-align: center;
+      font-family: 'VT323', monospace;
+      font-size: 1rem;
+    }
+
+    .auth-success {
+      background: rgba(0, 255, 0, 0.2);
+      border-color: var(--metro-terminal-green);
+      color: var(--metro-terminal-green);
+    }
+
+    .auth-error.show, .auth-success.show {
+      display: block;
+      animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 10px;
+      top: 38px;
+      background: none;
+      border: none;
+      color: var(--metro-terminal-green);
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .password-toggle:hover {
+      color: var(--metro-accent-red);
+      transform: scale(1.2);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Фоновое видео -->
+  <div class="video-bg">
+    <video autoplay muted loop>
+      <source src="images/background.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- Виньетка (осветлена) -->
+  <div class="vignette"></div>
+
+  <!-- Шапка -->
+  <header class="metro-header">
+    <div class="metro-logo" onclick="window.location.href='index.html'"></div>
+    <nav class="metro-nav">
+      <a href="projects.html" class="metro-nav-button">Проекты</a>
+      <a href="about.html" class="metro-nav-button">О нас</a>
+      <a href="rules.html" class="metro-nav-button">Правила</a>
+      <a href="support.html" class="metro-nav-button">Поддержка</a>
+      <a href="#" class="metro-nav-button" id="loginLink" onclick="event.preventDefault(); authSystem.openAuthModal('login');">Войти</a>
+      <a href="#" class="metro-nav-button" id="registerLink" onclick="event.preventDefault(); authSystem.openAuthModal('register');">Регистрация</a>
+    </nav>
+    <div class="metro-social">
+      <a href="#" class="metro-social-link"><i class="fab fa-discord"></i></a>
+      <a href="#" class="metro-social-link"><i class="fab fa-vk"></i></a>
+      <a href="#" class="metro-social-link"><i class="fab fa-youtube"></i></a>
+    </div>
+  </header>
+
+  <div id="radioIcon" class="radio-icon">
+    <img src="images/radio.png" alt="Радио" title="Включить радио">
+    <div id="radioPanel" class="radio-panel">
+        <div class="radio-header">
+            <h3>РАДИО "STORM-1"</h3>
+            <button id="closeRadio" class="radio-button">×</button>
+        </div>
+        <div class="radio-body">
+            <div class="radio-display">
+                <div class="frequency-display">ЧАСТОТА: <span id="freqDisplay">88.1</span> МГц</div>
+                <div class="volume-display">ГРОМКОСТЬ: <span id="volDisplay">50</span>%</div>
+                <div class="signal-light">
+                    <div class="light" id="signalLight"></div>
+                    <span>СИГНАЛ</span>
+                </div>
+            </div>
+
+            <div class="knob-container">
+                <div class="knob" id="frequencyKnob">
+                    <div class="knob-handle"></div>
+                    <label>ЧАСТОТА</label>
+                </div>
+                <div class="knob" id="volumeKnob">
+                    <div class="knob-handle"></div>
+                    <label>ГРОМКОСТЬ</label>
+                </div>
+            </div>
+
+            <div class="switch-container">
+                <div class="switch" id="powerSwitch">
+                    <div class="switch-slider"></div>
+                    <div class="switch-label">ВЫКЛ</div>
+                </div>
+            </div>
+        </div>
+        <div class="radio-static"></div>
+    </div>
+</div>
+
+<audio id="backgroundMusic"></audio>
+
+</div>
+
+  <!-- Основной контейнер -->
+  <div class="metro-container metro-fade-in" id="container">
+    <h1 class="metro-title metro-glow-text">COLDFIRE PROJECT</h1>
+
+    <div class="main-content">
+      <div class="metro-block metro-slide-in-left">
+        <h2 class="metro-glow-text" style="color: var(--metro-terminal-green); font-size: 1.8rem; margin-bottom: 1rem;">COLDFIRE PROJECT</h2>
+        <p style="font-size: 1.1rem; line-height: 1.8;">Проект Coldfire — это уникальный постапокалиптический сервер Minecraft, полностью погружающий вас в атмосферу вселенной Metro 2033. Здесь каждый игрок становится выжившим в подземном мире, где каждая станция метро — это отдельный мир со своей историей, правилами и опасностями.</p>
+      </div>
+    </div>
+
+    <!-- Скриншоты -->
+    <div class="metro-block metro-slide-in-right metro-border-glow">
+      <h2 class="metro-glow-text" style="color: var(--metro-terminal-cyan); font-size: 1.8rem; margin-bottom: 1.5rem; text-align: center;">СКРИНШОТЫ</h2>
+      <div class="screenshots-container">
+        <div class="screenshots-slider" id="screenshots-slider">
+          <!-- Слайд 1 -->
+          <div class="screenshot-slide active">
+            <div class="screenshot"><img src="images/Скрин_4.png" alt="Скрин 1"></div>
+            <div class="screenshot"><img src="images/Скрин_5.png" alt="Скрин 2"></div>
+            <div class="screenshot"><img src="images/Скрин_6.png" alt="Скрин 3"></div>
+          </div>
+          <!-- Слайд 2 -->
+          <div class="screenshot-slide">
+            <div class="screenshot"><img src="images/Скрин_7.png" alt="Скрин 4"></div>
+            <div class="screenshot"><img src="images/Скрин_8.png" alt="Скрин 5"></div>
+            <div class="screenshot"><img src="images/Скрин_9.png" alt="Скрин 6"></div>
+          </div>
+          <!-- Слайд 3 -->
+          <div class="screenshot-slide">
+            <div class="screenshot"><img src="https://i.imgur.com/7Vq9tJG.jpg" alt="Скрин 7"></div>
+            <div class="screenshot"><img src="https://i.imgur.com/7Vq9tJG.jpg" alt="Скрин 8"></div>
+            <div class="screenshot"><img src="https://i.imgur.com/7Vq9tJG.jpg" alt="Скрин 9"></div>
+          </div>
+          <!-- Слайд 4 -->
+          <div class="screenshot-slide">
+            <div class="screenshot"><img src="https://i.imgur.com/7Vq9tJG.jpg" alt="Скрин 10"></div>
+            <div class="screenshot"><img src="https://i.imgur.com/7Vq9tJG.jpg" alt="Скрин 11"></div>
+            <div class="screenshot"><img src="https://i.imgur.com/7Vq9tJG.jpg" alt="Скрин 12"></div>
+          </div>
+          <!-- Слайд 5 -->
+          <div class="screenshot-slide">
+            <div class="screenshot"><img src="https://i.imgur.com/7Vq9tJG.jpg" alt="Скрин 13"></div>
+            <div class="screenshot"><img src="https://i.imgur.com/7Vq9tJG.jpg" alt="Скрин 14"></div>
+            <div class="screenshot"><img src="https://i.imgur.com/7Vq9tJG.jpg" alt="Скрин 15"></div>
+          </div>
+        </div>
+
+        <!-- Кружки прокрутки -->
+        <div class="dots">
+          <span class="dot active" data-slide="0"></span>
+          <span class="dot" data-slide="1"></span>
+          <span class="dot" data-slide="2"></span>
+          <span class="dot" data-slide="3"></span>
+          <span class="dot" data-slide="4"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Играем -->
+    <div class="play-section metro-block metro-pulse" style="background: linear-gradient(135deg, rgba(10, 10, 20, 0.9), rgba(20, 10, 10, 0.9)); border: 2px solid var(--metro-accent-red);">
+      <h2 class="metro-glow-text" style="color: var(--metro-accent-red); font-size: 1.8rem; margin-bottom: 1.5rem;">ПОЧЕМУ СТОИТ ИГРАТЬ?</h2>
+      <ul>
+        <li>Уникальные локации и механики</li>
+        <li>Активное сообщество и события</li>
+        <li>Глубокая фракционная система</li>
+        <li>Регулярные обновления и баланс</li>
+        <li>Прозрачная администрация</li>
+      </ul>
+      <button class="metro-btn metro-shake" onclick="openModal()" style="margin-top: 1.5rem;">ИГРАТЬ</button>
+    </div>
+
+    <!-- Новости -->
+    <div class="metro-block news metro-slide-in-left">
+      <h2 class="metro-glow-text" style="color: var(--metro-terminal-cyan); font-size: 1.8rem; margin-bottom: 1.5rem; text-align: center;">НОВОСТИ</h2>
+
+      <!-- Новость 1 -->
+      <div class="news-item">
+        <div class="news-header">
+          <span class="news-date">2023-10-27</span>
+          <span class="news-title">Обновление сервера!</span>
+          <span class="news-toggle">+</span>
+        </div>
+        <div class="news-body">
+          <p class="news-text">
+            Мы рады объявить о выходе нового крупного обновления! Вас ждут новые локации, механики и многое другое.
+          </p>
+          <div class="news-images">
+            <img src="images/Скрин_1.png" alt="Скрин 1">
+            <img src="images/Скрин_2.png" alt="Скрин 2">
+            <img src="images/Скрин_3.png" alt="Скрин 3">
+          </div>
+        </div>
+      </div>
+
+      <!-- Новость 2 -->
+      <div class="news-item">
+        <div class="news-header">
+          <span class="news-date">2023-10-20</span>
+          <span class="news-title">Конкурс артов</span>
+          <span class="news-toggle">+</span>
+        </div>
+        <div class="news-body">
+          <p class="news-text">
+            Мы запускаем конкурс на лучший арт-объект для нашего мира. Победитель получит уникальный предмет и упоминание на сайте.
+          </p>
+          <div class="news-images">
+            <img src="https://i.imgur.com/7Vq9tJG.jpg" alt="Скрин 4">
+            <img src="https://i.imgur.com/7Vq9tJG.jpg" alt="Скрин 5">
+            <img src="https://i.imgur.com/7Vq9tJG.jpg" alt="Скрин 6">
+          </div>
+        </div>
+      </div>
+
+    <!-- Трейлер -->
+    <div class="metro-block trailer metro-slide-in-right">
+      <h2 class="metro-glow-text trailer-title" style="color: var(--metro-terminal-cyan); font-size: 1.8rem; margin-bottom: 1.5rem; text-align: center;">ТРЕЙЛЕР ПРОЕКТА</h2>
+      <div class="trailer-container">
+        <iframe width="700" height="400" src="images/background.mp4" frameborder="0" allowfullscreen></iframe>
+      </div>
+    </div>
+
+    <!-- Карта метро -->
+    <div class="metro-block map metro-slide-in-left metro-border-glow">
+      <h2 class="metro-glow-text map-title" style="color: var(--metro-terminal-cyan); font-size: 1.8rem; margin-bottom: 1.5rem; text-align: center;">КАРТА МЕТРО</h2>
+      <div class="map-container">
+        <img id="map-image" src="images/map.png" alt="Карта метро">
+      </div>
+      <div class="map-controls">
+        <button class="map-btn" onclick="zoomIn()">+</button>
+        <button class="map-btn" onclick="zoomOut()">-</button>
+        <button class="map-btn" onclick="toggleFullscreen()">⛶</button>
+      </div>
+    </div>
+
+    <!-- Ссылки -->
+    <div class="links">
+      <div class="link-box">
+        <div class="icon-frame">
+          <img src="images/Faction_general.png" alt="Фракции">
+        </div>
+        <h3>Фракции</h3>
+        <p>Описание фракций, их история и особенности.</p>
+        <a href="factions.html" class="metro-btn metro-btn-secondary metro-shake">ИЗУЧИТЬ</a>
+      </div>
+      <div class="link-box">
+        <div class="icon-frame">
+          <img src="images/Dev_general.png" alt="Разработчики">
+        </div>
+        <h3>Разработчики</h3>
+        <p>Команда проекта и благодарности.</p>
+        <a href="developers.html" class="metro-btn metro-btn-secondary metro-shake">ПОДРОБНЕЕ</a>
+      </div>
+    </div>
+
+  <!-- Футер -->
+  <footer class="metro-footer">
+    <div class="metro-footer-content">
+      <div class="footer-left">
+        <p>© 2025 | STORM Studio. Все права защищены.</p>
+        <p>Создано с любовью в бункере №7. Подземная сеть "Темная Линия".</p>
+      </div>
+      <div class="footer-right">
+        <p>Данный сайт не является официальным продуктом 4A Games.</p>
+        <p>Все материалы используются в некоммерческих целях.</p>
+      </div>
+    </div>
+    <div class="metro-footer-year">2033</div>
+  </footer>
+
+<!-- Отдельный блок "2033" — вне футера -->
+  <div class="year-easter metro-pulse" id="year-easter" style="font-size: 4rem; cursor: pointer;">2033</div>
+
+    <!-- Модальное окно: Как начать играть -->
+    <div id="modal" class="modal">
+      <div class="modal-content large">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>Как начать играть?</h2>
+        <p>Выберите способ установки:</p>
+
+        <div class="method">
+          <h3>1. Через лаунчер</h3>
+          <p>Скачайте официальный лаунчер и следуйте инструкциям.</p>
+          <img src="images/launcher.png" alt="Лаунчер" class="modal-img">
+          <ol>
+            <li>Скачайте лаунчер с сайта</li>
+            <li>Запустите и авторизуйтесь</li>
+            <li>Выберите сервер Coldfire</li>
+            <li>Нажмите "Играть"</li>
+          </ol>
+        </div>
+
+        <div class="method">
+          <h3>2. Сборка модов вручную</h3>
+          <p>Если вы хотите собрать всё самостоятельно.</p>
+          <img src="images/launcher2.png" alt="Моды" class="modal-img">
+          <ol>
+            <li>Скачайте Minecraft 1.19.2</li>
+            <li>Установите Forge</li>
+            <li>Скачайте моды из списка</li>
+            <li>Запустите игру</li>
+          </ol>
+        </div>
+
+        <div class="method">
+          <h3>IP-адрес сервера</h3>
+          <button class="ip-btn" onclick="copyToClipboard('coldfire.mineplex.ru')">coldfire.mineplex.ru</button>
+        </div>
+
+        <button class="btn" onclick="closeModal()">Закрыть</button>
+      </div>
+    </div>
+
+    <!-- Модальное окно: Пасхалка -->
+    <div id="easter-modal" class="modal">
+      <div class="modal-content large">
+        <span class="close" onclick="closeEasterModal()">&times;</span>
+        <div class="terminal-bg"></div> <!-- Фон терминала -->
+        <div class="terminal-content">
+          <h2>Разработчики</h2>
+          <div class="dev-list">
+            <p><strong>Арт-директор:</strong> Дмитрий Глуховский — создатель вселенной Metro.</p>
+            <p><strong>Программист:</strong> STORM — отвечает за логику сайта и интерфейс.</p>
+            <p><strong>Дизайнер:</strong> STORM — автор стиля, иконок и анимаций.</p>
+            <p><strong>Тестировщик:</strong> alexey_sokolov188 — проверяет всё на ошибки.</p>
+          </div>
+
+          <h3>Тайники (координаты в Minecraft)</h3>
+          <div class="coords">
+            <p><strong>Тайник 1:</strong> x: 1234, y: XXX, z: -5678 — Под мостом на станции Китай-города.</p>
+            <p><strong>Тайник 2:</strong> x: -9876, y: XXX, z: 4321 — В военной лаборатории.</p>
+            <p><strong>Тайник 3:</strong> x: 5555, y: XXX, z: -1111 — В заброшенном доме у развилки Полиса</p>
+            <p><strong>Тайник 4:</strong> x: 9999, y: XX, z: -9999 — Глубоко под землёй, рядом со станцией Рейха.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- Фоновая музыка -->
+  <audio id="bg-music" autoplay loop>
+    <source src="images/Музыка.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    // Загрузка завершается через 2.5 сек
+    window.addEventListener('load', () => {
+      const audio = document.getElementById('bg-music');
+      audio.volume = 0.05; // минимальная громкость
+      audio.play().catch(e => console.log("Автовоспроизведение заблокировано"));
+    });
+  
+    document.addEventListener('DOMContentLoaded', function () {
+      // ============== РАДИО ==============
+      const radioIcon = document.getElementById('radioIcon');
+      const radioPanel = document.getElementById('radioPanel');
+      const backgroundMusic = document.getElementById('backgroundMusic');
+      const signalLight = document.getElementById('signalLight');
+      const freqDisplay = document.getElementById('freqDisplay');
+      const volDisplay = document.getElementById('volDisplay');
+      const powerSwitch = document.getElementById('powerSwitch');
+      const frequencyKnob = document.getElementById('frequencyKnob');
+      const volumeKnob = document.getElementById('volumeKnob');
+      const radioStatic = document.querySelector('.radio-static');
+  
+      const playlist = [
+        "music/metro_main.mp3",
+        "music/metro_main2.mp3",
+        "music/metro_main3.mp3",
+        "music/metro_main4.mp3",
+        "music/metro_main5.mp3",
+        "music/metro_main6.mp3",
+        "music/metro_main7.mp3",
+        "music/metro_main8.mp3",
+        "music/metro_main9.mp3"
+      ];
+  
+      const frequencies = [
+        "88.1", "89.5", "91.3", "92.7", "94.9", "96.1", "98.3", "100.5", "102.9"
+      ];
+  
+      let currentTrackIndex = 0;
+      let isPlaying = false;
+      let isInitialized = false;
+  
+      // Открытие/закрытие панели радио
+      if (radioIcon) {
+        radioIcon.addEventListener('click', function () {
+          radioPanel.classList.toggle('active');
+        });
+      }
+  
+      // Переключение питания
+      if (powerSwitch) {
+        powerSwitch.addEventListener('click', function () {
+          this.classList.toggle('on');
+          this.querySelector('.switch-label').textContent = this.classList.contains('on') ? 'ВКЛ' : 'ВЫКЛ';
+  
+          if (this.classList.contains('on')) {
+            if (!isInitialized) {
+              initializeMusic();
+              isInitialized = true;
+            }
+            playMusic();
+          } else {
+            pauseMusic();
+          }
+        });
+      }
+  
+      // Управление частотой
+      let isDraggingFreq = false;
+      let startAngleFreq = 0;
+      let currentAngleFreq = 0;
+  
+      function startDragFreq(e) {
+        isDraggingFreq = true;
+        const rect = frequencyKnob.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+        startAngleFreq = angle;
+  
+        document.addEventListener('mousemove', dragFreq);
+        document.addEventListener('mouseup', stopDragFreq);
+        document.addEventListener('touchmove', e => dragFreq(e.touches[0]));
+        document.addEventListener('touchend', stopDragFreq);
+      }
+  
+      function dragFreq(e) {
+        if (!isDraggingFreq) return;
+        const rect = frequencyKnob.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+        const deltaAngle = angle - startAngleFreq;
+        currentAngleFreq += deltaAngle * (180 / Math.PI);
+        startAngleFreq = angle;
+  
+        currentAngleFreq = Math.max(-135, Math.min(135, currentAngleFreq));
+        frequencyKnob.querySelector('.knob-handle').style.transform = `rotate(${currentAngleFreq}deg)`;
+  
+        const trackIndex = Math.floor((currentAngleFreq + 135) / 30);
+        currentTrackIndex = Math.max(0, Math.min(playlist.length - 1, trackIndex));
+        if (freqDisplay) freqDisplay.textContent = frequencies[currentTrackIndex];
+  
+        if (isPlaying) {
+          loadTrack(currentTrackIndex);
+        }
+      }
+  
+      function stopDragFreq() {
+        isDraggingFreq = false;
+        document.removeEventListener('mousemove', dragFreq);
+        document.removeEventListener('mouseup', stopDragFreq);
+        document.removeEventListener('touchmove', dragFreq);
+        document.removeEventListener('touchend', stopDragFreq);
+      }
+  
+      if (frequencyKnob) {
+        frequencyKnob.addEventListener('mousedown', startDragFreq);
+        frequencyKnob.addEventListener('touchstart', e => {
+          e.preventDefault();
+          startDragFreq(e.touches[0]);
+        });
+      }
+  
+      // Управление громкостью
+      let isDraggingVol = false;
+      let startAngleVol = 0;
+      let currentAngleVol = 0;
+  
+      function startDragVol(e) {
+        isDraggingVol = true;
+        const rect = volumeKnob.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+        startAngleVol = angle;
+  
+        document.addEventListener('mousemove', dragVol);
+        document.addEventListener('mouseup', stopDragVol);
+        document.addEventListener('touchmove', e => dragVol(e.touches[0]));
+        document.addEventListener('touchend', stopDragVol);
+      }
+  
+      function dragVol(e) {
+        if (!isDraggingVol) return;
+        const rect = volumeKnob.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+        const deltaAngle = angle - startAngleVol;
+        currentAngleVol += deltaAngle * (180 / Math.PI);
+        startAngleVol = angle;
+  
+        currentAngleVol = Math.max(-135, Math.min(135, currentAngleVol));
+        volumeKnob.querySelector('.knob-handle').style.transform = `rotate(${currentAngleVol}deg)`;
+  
+        const volume = (currentAngleVol + 135) / 270;
+        if (backgroundMusic) backgroundMusic.volume = volume;
+        if (volDisplay) volDisplay.textContent = Math.round(volume * 100);
+        localStorage.setItem('radioVolume', volume);
+      }
+  
+      function stopDragVol() {
+        isDraggingVol = false;
+        document.removeEventListener('mousemove', dragVol);
+        document.removeEventListener('mouseup', stopDragVol);
+        document.removeEventListener('touchmove', dragVol);
+        document.removeEventListener('touchend', stopDragVol);
+      }
+  
+      if (volumeKnob) {
+        volumeKnob.addEventListener('mousedown', startDragVol);
+        volumeKnob.addEventListener('touchstart', e => {
+          e.preventDefault();
+          startDragVol(e.touches[0]);
+        });
+      }
+  
+      // Восстановление громкости из localStorage
+      const savedVolume = localStorage.getItem('radioVolume');
+      if (savedVolume && backgroundMusic && volDisplay && volumeKnob) {
+        backgroundMusic.volume = parseFloat(savedVolume);
+        volDisplay.textContent = Math.round(parseFloat(savedVolume) * 100);
+        currentAngleVol = parseFloat(savedVolume) * 270 - 135;
+        volumeKnob.querySelector('.knob-handle').style.transform = `rotate(${currentAngleVol}deg)`;
+      }
+  
+      // Инициализация и управление воспроизведением
+      function initializeMusic() {
+        if (backgroundMusic) {
+          backgroundMusic.src = playlist[currentTrackIndex];
+          backgroundMusic.load();
+        }
+      }
+  
+      function loadTrack(index) {
+        currentTrackIndex = index;
+        if (backgroundMusic) {
+          backgroundMusic.src = playlist[index];
+          backgroundMusic.load();
+        }
+        if (freqDisplay) freqDisplay.textContent = frequencies[index];
+        if (isPlaying && backgroundMusic) {
+          backgroundMusic.play().catch(e => console.log("Playback failed"));
+        }
+      }
+  
+      function playMusic() {
+        if (!backgroundMusic) return;
+        backgroundMusic.play().then(() => {
+          isPlaying = true;
+          if (signalLight) signalLight.classList.add('on');
+          if (radioStatic) radioStatic.classList.add('active');
+        }).catch(e => {
+          console.log("Autoplay blocked - user must interact first");
+        });
+      }
+  
+      function pauseMusic() {
+        if (!backgroundMusic) return;
+        backgroundMusic.pause();
+        isPlaying = false;
+        if (signalLight) signalLight.classList.remove('on');
+        if (radioStatic) radioStatic.classList.remove('active');
+      }
+  
+      if (backgroundMusic) {
+        backgroundMusic.addEventListener('ended', function () {
+          currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+          loadTrack(currentTrackIndex);
+          if (isPlaying) {
+            backgroundMusic.play();
+          }
+        });
+      }
+  
+      // ============== ОСТАЛЬНЫЕ ФУНКЦИИ ==============
+  
+      // Прокрутка скриншотов
+      const slider = document.getElementById('screenshots-slider');
+      const dots = document.querySelectorAll('.dot');
+      let currentSlide = 0;
+  
+      dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+          currentSlide = index;
+          updateSlider();
+        });
+      });
+  
+      function updateSlider() {
+        if (slider) slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+        dots.forEach(dot => dot.classList.remove('active'));
+        dots[currentSlide].classList.add('active');
+      }
+  
+      // Автопрокрутка каждые 5 сек
+      setInterval(() => {
+        currentSlide = (currentSlide + 1) % dots.length;
+        updateSlider();
+      }, 5000);
+  
+      // Переменные для карты
+      let zoom = 1;
+      const mapImage = document.getElementById('map-image');
+  
+      // Увеличить
+      window.zoomIn = function () {
+        zoom += 0.1;
+        if (zoom > 2) zoom = 2;
+        updateZoom();
+      };
+  
+      // Уменьшить
+      window.zoomOut = function () {
+        zoom -= 0.1;
+        if (zoom < 0.5) zoom = 0.5;
+        updateZoom();
+      };
+  
+      // Обновить масштаб
+      function updateZoom() {
+        if (mapImage) mapImage.style.transform = `scale(${zoom})`;
+      }
+  
+      // Полноэкранный режим
+      window.toggleFullscreen = function () {
+        if (!document.fullscreenElement) {
+          if (mapImage) mapImage.requestFullscreen().catch(err => {
+            console.error('Ошибка полноэкранного режима:', err);
+          });
+        } else {
+          document.exitFullscreen();
+        }
+      };
+  
+      // Захват мыши для перемещения карты
+      if (mapImage) {
+        mapImage.addEventListener('mousedown', (e) => {
+          const startX = e.clientX;
+          const startY = e.clientY;
+          const startTransform = mapImage.style.transform || 'scale(1)';
+          const startMatrix = new DOMMatrix(startTransform);
+          const startTranslateX = startMatrix.m41;
+          const startTranslateY = startMatrix.m42;
+  
+          mapImage.classList.add('grabbing');
+  
+          const moveHandler = (e) => {
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+  
+            const translateX = startTranslateX + deltaX;
+            const translateY = startTranslateY + deltaY;
+  
+            mapImage.style.transform = `translate(${translateX}px, ${translateY}px) scale(${zoom})`;
+          };
+  
+          const upHandler = () => {
+            mapImage.classList.remove('grabbing');
+            document.removeEventListener('mousemove', moveHandler);
+            document.removeEventListener('mouseup', upHandler);
+          };
+  
+          document.addEventListener('mousemove', moveHandler);
+          document.addEventListener('mouseup', upHandler);
+        });
+      }
+  
+      // Раскрытие новостей
+      document.querySelectorAll('.news-toggle').forEach(toggle => {
+        toggle.addEventListener('click', () => {
+          const parent = toggle.closest('.news-item');
+          const body = parent.querySelector('.news-body');
+          const icon = toggle;
+  
+          if (body.classList.contains('show')) {
+            body.classList.remove('show');
+            body.style.display = 'none';
+            icon.textContent = '+';
+            icon.classList.remove('open');
+          } else {
+            body.classList.add('show');
+            body.style.display = 'block';
+            icon.textContent = '-';
+            icon.classList.add('open');
+          }
+        });
+      });
+  
+      // Открыть/закрыть модальное окно "Играть"
+      window.openModal = function () {
+        const modal = document.getElementById('modal');
+        if (modal) {
+          modal.style.display = 'flex';
+          setTimeout(() => modal.classList.add('active'), 10);
+        }
+      };
+  
+      window.closeModal = function () {
+        const modal = document.getElementById('modal');
+        if (modal) {
+          modal.classList.remove('active');
+          setTimeout(() => modal.style.display = 'none', 300);
+        }
+      };
+  
+      // Копирование IP
+      window.copyToClipboard = function (text) {
+        navigator.clipboard.writeText(text).then(() => {
+          alert('IP-адрес скопирован!');
+        }).catch(err => {
+          console.error('Ошибка копирования: ', err);
+          alert('Не удалось скопировать. Вручную: ' + text);
+        });
+      };
+  
+      // Пасхалка
+      window.openEasterModal = function () {
+        const modal = document.getElementById('easter-modal');
+        if (modal) {
+          modal.style.display = 'flex';
+          setTimeout(() => {
+            modal.classList.add('active');
+            const paragraphs = modal.querySelectorAll('.terminal-content p');
+            paragraphs.forEach((p, index) => {
+              p.style.animationDelay = `${index * 0.1}s`;
+            });
+          }, 10);
+        }
+      };
+  
+      window.closeEasterModal = function () {
+        const modal = document.getElementById('easter-modal');
+        if (modal) {
+          modal.classList.remove('active');
+          setTimeout(() => modal.style.display = 'none', 300);
+        }
+      };
+  
+      // Клик по "2033"
+      const easterBtn = document.getElementById('year-easter');
+      if (easterBtn) {
+        easterBtn.addEventListener('click', openEasterModal);
+      }
+  
+      // Закрытие модалки по клику вне
+      window.onclick = function (event) {
+        const modal = document.getElementById('modal');
+        if (modal && event.target === modal) {
+          modal.style.display = 'none';
+        }
+      };
+    });
+  </script>
+</body>
+</html>

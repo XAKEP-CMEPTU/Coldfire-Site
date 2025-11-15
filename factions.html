@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Фракции | Metro 2033</title>
+
+  <!-- Шрифты -->
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <!-- Единый стиль Metro 2033 -->
+  <link rel="stylesheet" href="metro2033-unified.css">
+  <!-- Скрипт загрузочной заставки -->
+  <script src="metro2033-loader.js" defer></script>
+  <!-- Скрипт курсора -->
+  <script src="metro2033-cursor.js" defer></script>
+  <!-- Скрипт эффектов -->
+  <script src="metro2033-effects.js" defer></script>
+  <!-- Скрипт авторизации -->
+  <script src="auth-system.js" defer></script>
+  <!-- Скрипт модального окна пользователя -->
+  <script src="user-modal.js" defer></script>
+
+  <style>
+    /* --- Глобальные стили --- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #000;
+      color: #ccc;
+      font-family: 'Roboto Mono', monospace;
+      overflow-x: hidden;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    /* Эффект шума */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: url('images/metro_background.gif');
+      opacity: 0.05;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Фоновое видео */
+    .video-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+      opacity: 0.3;
+    }
+    video { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Виньетка */
+    .vignette {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(circle at center, transparent, rgba(0,0,0,0.9) 80%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Старые стили загрузочного экрана удалены - используется metro2033-loader.js */
+
+    /* --- Шапка --- */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 5%;
+      background: linear-gradient(to bottom, rgba(10, 15, 25, 0.9), rgba(20, 25, 35, 0.7));
+      border-bottom: 2px solid #333;
+      border-image: url('images/Скрин_2.png') 30 round;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .logo {
+      width: 50px;
+      height: 50px;
+      background: url('images/logo.png') no-repeat center;
+      background-size: contain;
+      border: 2px solid #444;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(0, 170, 255, 0.4);
+      animation: pulse 2s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { box-shadow: 0 0 10px rgba(0, 170, 255, 0.4); }
+      to { box-shadow: 0 0 20px rgba(0, 170, 255, 0.8), 0 0 30px rgba(0, 100, 150, 0.5); }
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 0.8rem;
+    }
+
+    /* Кнопки-ссылки в шапке */
+    .nav-button {
+      padding: 0.6rem 1.1rem;
+      background: rgba(30, 40, 60, 0.6);
+      border: 1px solid #444;
+      color: #aaa;
+      font-size: 0.9rem;
+      border-radius: 4px;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-button::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .nav-button:hover::after {
+      left: 100%;
+    }
+
+    .nav-button:hover {
+      background: rgba(50, 70, 100, 0.8);
+      color: #fff;
+      border-color: #00aaff;
+      transform: scale(1.05);
+    }
+
+    /* Кнопки в блоках */
+    .btn-secondary {
+      display: inline-block;
+      padding: 0.6rem 1.2rem;
+      background: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+      background: #27ae60;
+      transform: scale(1.05);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .social-links {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .social-link {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(30, 40, 60, 0.6);
+      border: 1px solid #444;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .social-link:hover {
+      background: #00aaff;
+      color: #000;
+      transform: scale(1.1);
+    }
+
+    /* --- Основной контейнер --- */
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0;
+      background: rgba(15, 20, 30, 0.8);
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.7),
+                  inset 0 0 20px rgba(0, 0, 0, 0.5);
+      border: 1px solid #333;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeInUp 1s forwards 0.5s;
+    }
+
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .title {
+      text-align: center;
+      padding: 1.8rem 0;
+      color: #00aaff;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px rgba(0, 170, 255, 0.6);
+      border-bottom: 1px solid #333;
+    }
+
+    .main-content {
+      display: flex;
+      min-height: 500px;
+      gap: 2rem;
+      padding: 1.5rem;
+    }
+
+    /* Бегунок фракций */
+    .faction-list {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      padding: 1.2rem;
+      background: rgba(20, 25, 40, 0.7);
+      border-radius: 10px;
+      border: 1px solid #333;
+      overflow-y: auto;
+      max-height: 500px;
+      position: relative;
+    }
+
+    .faction-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .faction-list::-webkit-scrollbar-track {
+      background: rgba(30, 35, 50, 0.8);
+      border-radius: 3px;
+    }
+
+    .faction-list::-webkit-scrollbar-thumb {
+      background: #00aaff;
+      border-radius: 3px;
+      transition: background 0.3s ease;
+    }
+
+    .faction-list::-webkit-scrollbar-thumb:hover {
+      background: #0088ff;
+    }
+
+    .faction-item {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.8rem 1rem;
+      background: rgba(30, 35, 50, 0.6);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .faction-item::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1));
+      transition: left 0.5s;
+    }
+
+    .faction-item:hover::before {
+      left: 100%;
+    }
+
+    .faction-item:hover {
+      background: rgba(40, 50, 70, 0.8);
+      border-color: #00aaff;
+      transform: translateX(5px);
+    }
+
+    .faction-item.active {
+      background: var(--metro-accent-red);
+      color: #000;
+      font-weight: bold;
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(231, 76, 60, 0.7);
+      border-color: var(--metro-terminal-green);
+    }
+
+    .faction-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: url('images/Скрин_4.png') no-repeat center;
+      background-size: contain;
+      border: 2px solid #555;
+    }
+
+    .faction-name {
+      font-size: 0.95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Карточка фракции */
+    .faction-detail {
+      flex: 2;
+      background: rgba(25, 30, 45, 0.7);
+      border-radius: 10px;
+      padding: 1.8rem;
+      border: 1px solid #333;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      transform: scale(0.95);
+      transition: all 0.6s ease;
+    }
+
+    .faction-detail.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .faction-detail > div {
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+    }
+
+    .faction-logo-big {
+      width: 160px;
+      height: 160px;
+      border-radius: 10px;
+      background: url('images/Скрин_8.png') no-repeat center;
+      background-size: contain;
+      border: 2px solid #444;
+      box-shadow: 0 0 15px rgba(0, 170, 255, 0.3);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .faction-info {
+      flex: 1;
+    }
+
+    .faction-title {
+      color: #00aaff;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.4rem;
+      margin-bottom: 0.8rem;
+      text-shadow: 0 0 5px rgba(0, 170, 255, 0.5);
+    }
+
+    .faction-desc {
+      color: #ccc;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      max-height: 120px;
+      overflow: hidden;
+    }
+
+    .read-more-btn {
+      background: rgba(0, 170, 255, 0.2);
+      color: #ccc;
+      border: 1px solid #00aaff;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+    }
+
+    .read-more-btn:hover {
+      background: rgba(0, 170, 255, 0.4);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .full-desc {
+      display: none;
+      color: #ccc;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-top: 1rem;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* --- Футер --- */
+    footer {
+      margin-top: 3rem;
+      padding: 2rem 5%;
+      background: linear-gradient(to top, #0a0f1a, #151a2a);
+      border-top: 2px solid #333;
+      border-image: url('images/Скрин_5.png') 30 round;
+      text-align: center;
+      color: #888;
+      font-size: 0.85rem;
+      position: relative;
+      box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-left, .footer-right {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .year {
+      position: absolute;
+      bottom: 1rem;
+      right: 2rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3.5rem;
+      color: #00aaff;
+      opacity: 0.5;
+      z-index: 1;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Фоновое видео -->
+  <div class="video-bg">
+    <video autoplay muted loop>
+      <source src="images/background.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- Виньетка -->
+  <div class="vignette"></div>
+
+  <!-- Шапка -->
+<header>
+  <div class="logo"></div>
+  <nav class="nav-buttons">
+    <a href="projects.html" class="nav-button">Проекты</a>
+    <a href="about.html" class="nav-button">О нас</a>
+    <a href="rules.html" class="nav-button">Правила</a>
+    <a href="index.html" class="nav-button">На главную</a>
+  </nav>
+  <div class="social-links">
+    <a href="https://t.me/yourchannel" target="_blank" class="social-link">TG</a>
+    <a href="https://vk.com/yourpage" target="_blank" class="social-link">VK</a>
+    <a href="https://discord.gg/yourserver" target="_blank" class="social-link">DS</a>
+  </div>
+</header>
+
+  <!-- Основной контейнер -->
+  <div class="metro-container metro-fade-in" id="container">
+    <h1 class="metro-title metro-glow-text metro-slide-in-right">ФРАКЦИИ МЕТРО 2033</h1>
+    <div class="main-content">
+      <!-- Бегунок фракций -->
+      <div class="faction-list metro-slide-in-left" id="faction-list" style="border: 2px solid var(--metro-accent-red); box-shadow: 0 0 15px rgba(231, 76, 60, 0.3);">
+        <div class="faction-item metro-shake" data-faction="redline">⚔️ Красная линия</div>
+        <div class="faction-item metro-shake" data-faction="kitaigorod">🏯 Китай-город</div>
+        <div class="faction-item metro-shake" data-faction="4reykh">⚡ 4 рейх</div>
+        <div class="faction-item metro-shake" data-faction="hanza">💎 Ганза</div>
+        <div class="faction-item metro-shake" data-faction="free">📚 Полис</div>
+        <div class="faction-item metro-shake" data-faction="militia">🔨 Троцкисты</div>
+        <div class="faction-item metro-shake" data-faction="spetsnaz">🎖️ Орден "Спарта"</div>
+        <div class="faction-item metro-shake" data-faction="necropolis">⚰️ Язычники</div>
+        <div class="faction-item metro-shake" data-faction="baltic">🏛️ Венеция</div>
+        <div class="faction-item metro-shake" data-faction="london">⚡ Севастопольская ГЭС</div>
+        <div class="faction-item metro-shake" data-faction="dynamo">🏋️ Бауманский альянс</div>
+        <div class="faction-item metro-shake" data-faction="police">🛡️ Арбатская конфедерация</div>
+        <div class="faction-item metro-shake" data-faction="dolg">🤝 Содружество ВДНХ</div>
+        <div class="faction-item metro-shake" data-faction="republic">🌿 Ясеневская община</div>
+        <div class="faction-item metro-shake" data-faction="tunnelers">🔥 Сатанисты</div>
+        <div class="faction-item metro-shake" data-faction="vory">💰 Кузнецкий мост</div>
+        <div class="faction-item metro-shake" data-faction="zvezda">⭐ Фермы и Фактории</div>
+        <div class="faction-item metro-shake" data-faction="siberian">❄️ Конфедерация 1905 года</div>
+        <div class="faction-item metro-shake" data-faction="darkness">🌑 Северный эмират</div>
+        <div class="faction-item metro-shake" data-faction="limon">🍋 Лимонкаъ</div>
+      </div>
+
+      <!-- Карточка фракции -->
+      <div class="faction-detail metro-slide-in-right metro-border-glow" id="faction-detail" style="border: 2px solid var(--metro-terminal-cyan); box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);">
+        <div>
+          <div class="faction-logo-big" id="faction-logo"></div>
+          <div class="faction-info">
+            <h2 class="faction-title" id="faction-title">Выберите фракцию</h2>
+            <p class="faction-desc" id="faction-desc">Информация о фракции появится здесь. Выберите одну из группировок слева.</p>
+            <button class="read-more-btn" onclick="toggleDesc()">Подробнее</button>
+            <p class="full-desc" id="full-desc"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Футер -->
+  <footer class="metro-footer">
+    <div class="metro-footer-content">
+      <div class="footer-left">
+        <p>© 2025 | <span class="metro-glow-text" style="color: var(--metro-terminal-cyan);">STORM Studio</span>. Все права защищены.</p>
+        <p>Создано с любовью в бункере №7. Подземная сеть "Темная Линия".</p>
+      </div>
+      <div class="footer-right">
+        <p>Данный сайт не является официальным продуктом 4A Games.</p>
+        <p>Все материалы используются в некоммерческих целях.</p>
+      </div>
+    </div>
+    <div class="metro-footer-year">2033</div>
+  </footer>
+
+  <script>
+    // Данные фракций
+    const factions = {
+      redline: {
+        logo: 'images/Ussr.png',
+        title: 'Красная линия',
+        desc: 'Коммунистическая фракция, стремящаяся восстановить советскую власть. Военная дисциплина, равенство, но жестокость к инакомыслящим.',
+        fullDesc: 'Красная Линия — военизированная фракция, возглавляемая коммунистами. Их идеология основана на равенстве и коллективизме, но часто приводит к репрессиям. У них есть школы, больницы и армия. Их главная цель — восстановление Советского Союза в новом виде.'
+      },
+      kitaigorod: {
+        logo: 'images/Китайка.png',
+        title: 'Китай-город',
+        desc: 'В мрачном мире постапокалиптического метро Москвы, где каждый день – это борьба за выживание, существует немало опасных группировок. Одна из них, известная как Китай-город, выделяется своей спецификой и жестокостью.',
+        fullDesc: 'Китай-город – это жестокая и хорошо организованная криминальная группировка, действующая в метро. Они используют восточные мотивы и отличаются крайней безжалостностью в достижении своих целей, контролируя торговлю и ресурсы на своей территории.'
+      },
+      '4reykh': {
+        logo: 'images/Nazi.png',
+        title: '4 рейх',
+        desc: 'Фракция националистов, следующих идеологии национал-социализма. Жесткая дисциплина, расовая чистота, агрессивная экспансия.',
+        fullDesc: '4 рейх — экстремистская группировка, основанная на фашистской идеологии. Они одеты в старую униформу, используют символику Третьего рейха. Их методы жестоки, но эффективны. Цель — создать "чистое" общество в метро.'
+      },
+      hanza: {
+        logo: 'images/hanza.png',
+        title: 'Ганза',
+        desc: 'Конфедерация торговых станций, контролирующая экономику метро. Главный поставщик еды, света и ресурсов.',
+        fullDesc: 'Ханза — торговый альянс, контролирующий большую часть экономики метро. Они не воюют напрямую, но покупают влияние. Их станции — самые светлые и сытые. Ханза — сердце подземного мира, но за светом скрывается коррупция.'
+      },
+      free: {
+        logo: 'images/Polis.png',
+        title: 'Полис',
+        desc: 'Анархисты и бунтовщики, выступающие против диктатуры и тирании. Борются за свободу, но часто действуют радикально.',
+        fullDesc: 'Свобода — это движение анархистов и революционеров, выступающих против всех диктатур. Они не признают власти, живут в бункерах и тоннелях. Их идеалы — свобода и равенство, но их методы часто приводят к хаосу. Тем не менее, они — голос сопротивления.'
+      },
+      militia: {
+        logo: 'images/Trock.png',
+        title: 'Троцкисты',
+        desc: 'Полицейская фракция, пытающаяся поддерживать порядок. Строгое соблюдение законов, но часто коррумпирована.',
+        fullDesc: 'Милиция — это полицейская структура, которая пытается поддерживать порядок в метро. Хотя они формально нейтральны, часто работают на более сильные фракции. Их форма — старый мундир с погонами. Недоверие к ним высокое.'
+      },
+      spetsnaz: {
+        logo: 'https://i.imgur.com/1KmN2dO.png',
+        title: 'Орден "Спарта',
+        desc: 'Элитные военные, обученные в СССР. Высокая дисциплина, боевые навыки, но мало численность.',
+        fullDesc: 'Спецназ — элитные военные, которые пережили войну. Они обучены тактике, стрельбе и выживанию. Не принадлежат ни одной фракции, но могут быть наняты. Их символ — черный берет.'
+      },
+      necropolis: {
+        logo: 'https://i.imgur.com/7S6kZ3C.png',
+        title: 'Язычники',
+        desc: 'Фракция, живущая среди мёртвых. Религиозная, суровая, обладает знаниями о прошлом.',
+        fullDesc: 'Некрополь — это сообщество, живущее в могильниках. Они поклоняются мёртвым, считая их защитниками. Их лидер — "Повелитель мёртвых". Их культура — смесь мистики и ужаса.'
+      },
+      baltic: {
+        logo: 'images/Ven1.png',
+        title: 'Венеция',
+        desc: 'Группа выживших из Балтики. Строгое управление, научные исследования, связь с внешним миром.',
+        fullDesc: 'Балтийский бункер — это научная база, где проводятся эксперименты над людьми и генетикой. Они верят, что смогут спасти человечество. Но их методы вызывают страх.'
+      },
+      london: {
+        logo: 'https://i.imgur.com/6P0wV6D.png',
+        title: 'Севастопольская ГЭС',
+        desc: 'Фракция британских выживших. Строгая дисциплина, английская культура, но замкнутость.',
+        fullDesc: 'Лондон — это закрытая колония, где живут потомки британцев. Они говорят на английском, но не принимают новых людей. Их символ — королевский герб.'
+      },
+      dynamo: {
+        logo: 'https://i.imgur.com/4BQFJxL.png',
+        title: 'Бауманский альянс',
+        desc: 'Фракция, основанная на спорте и силе. Практикуют борьбу, единоборства, физическую подготовку.',
+        fullDesc: 'Динамо — это фракция, где сила и здоровье важнее всего. Они тренируются каждый день, участвуют в боях. Их лидер — бывший спортсмен. Их символ — мяч.'
+      },
+      police: {
+        logo: 'https://i.imgur.com/8oq1H5Y.png',
+        title: 'Арбатская конфедерация',
+        desc: 'Формальная полиция, созданная после войны. Пытается поддерживать порядок, но часто беспомощна.',
+        fullDesc: 'Полиция — это остатки старой системы. Они носят форму, но не имеют реальной власти. Их работа — патрулирование, но они не могут остановить войны.'
+      },
+      dolg: {
+        logo: 'https://i.imgur.com/1KmN2dO.png',
+        title: 'Содружество ВДНХ',
+        desc: 'Фракция, придерживающаяся принципа "долга перед обществом". Честные, но жёсткие.',
+        fullDesc: 'Долг — это фракция, которая верит в обязательства перед другими. Они помогают нуждающимся, но не терпят предательства. Их символ — меч и щит.'
+      },
+      republic: {
+        logo: 'https://i.imgur.com/9tGz5lE.png',
+        title: 'Ясеневская община',
+        desc: 'Небольшая демократическая фракция, стремящаяся к свободе и правам человека.',
+        fullDesc: 'Республика — это попытка создать демократию в метро. Они проводят выборы, но их власть ограничена. Их символ — флаг с белым крестом.'
+      },
+      tunnelers: {
+        logo: 'https://i.imgur.com/6P0wV6D.png',
+        title: 'Сатанисты',
+        desc: 'Группа рабочих, которые строят и ремонтируют тоннели. Живут в условиях тяжёлого труда.',
+        fullDesc: 'Тоннельщики — это люди, которые живут под землёй. Они строят тоннели, ремонтируют трубопроводы. Их работа опасна, но необходима. Они не хотят войны, но не могут избежать её.'
+      },
+      vory: {
+        logo: 'https://i.imgur.com/8oq1H5Y.png',
+        title: 'Кузнецкий мост',
+        desc: 'Подпольная мафиозная структура, контролирующая торговлю и насилие.',
+        fullDesc: 'Воры — это подпольная организация, которая контролирует всё, что связано с криминалом. Они не признают власти, но имеют свою систему. Их символ — знак "подполья".'
+      },
+      zvezda: {
+        logo: 'https://i.imgur.com/4BQFJxL.png',
+        title: 'Фермы и Фактории',
+        desc: 'Фракция, верящая в космос и будущее. Стремятся к выходу на поверхность.',
+        fullDesc: 'Звезда — это группа учёных и исследователей, которые верят, что человечество может вернуться на поверхность. Они строят ракеты, проводят эксперименты. Их символ — звезда.'
+      },
+      siberian: {
+        logo: 'https://i.imgur.com/1KmN2dO.png',
+        title: 'Конфедерация 1905 года',
+        desc: 'Выжившие из Сибири, привыкшие к холоду и изоляции. Открытые, но суровые.',
+        fullDesc: 'Сибирская группа — это люди, которые пережили зиму. Они привыкли к холоду, к голоду. Их культура — простая, но сильная. Их символ — медведь.'
+      },
+      darkness: {
+        logo: 'https://i.imgur.com/7S6kZ3C.png',
+        title: 'Северный эмират',
+        desc: 'Тайная фракция, действующая в тени. Их цель — контроль над всеми.',
+        fullDesc: 'Тьма — это тайная организация, которая действует в тени. Они знают всё, кто кто. Их цель — контролировать все фракции. Их символ — глаз.'
+      },
+      limon: {
+        logo: 'images/limon.png',
+        title: 'Лимонкаъ',
+        desc: 'В 2033 году в метро под предводительством поляка "Кучера" возникло национал-большевистское движение "Лимонкаъ", стремящееся к славянскому величию и переустройству мира.',
+        fullDesc: '"Лимонкаъ" – это национал-большевистская фракция, основанная в 2033 году на станции Сретенский Бульвар Ковалем Мазуром по прозвищу "Кучер". Целью фракции является построение лучшего мира для своих граждан, свержение существующей системы, укрепление славянского национализма и развитие метрополитена. Организация обладает собственной структурой власти, включающей "Гестапо" (полиция и охрана), "ВЧК" (спецслужбы) и "Гвардию" (армия).'
+      },
+    };
+
+    // Переключение фракций
+    document.querySelectorAll('.faction-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.faction-item').forEach(el => el.classList.remove('active'));
+        item.classList.add('active');
+
+        const factionId = item.getAttribute('data-faction');
+        showFaction(factionId);
+      });
+    });
+
+    function showFaction(id) {
+      const f = factions[id];
+      if (!f) return;
+
+      const detail = document.getElementById('faction-detail');
+      detail.classList.remove('active');
+
+      setTimeout(() => {
+        document.getElementById('faction-logo').style.backgroundImage = `url(${f.logo})`;
+        document.getElementById('faction-title').textContent = f.title;
+        document.getElementById('faction-desc').textContent = f.desc;
+        document.getElementById('full-desc').textContent = f.fullDesc;
+        document.getElementById('full-desc').style.display = 'none';
+        detail.classList.add('active');
+      }, 200);
+    }
+
+    function toggleDesc() {
+      const fullDesc = document.getElementById('full-desc');
+      const btn = document.querySelector('.read-more-btn');
+      if (fullDesc.style.display === 'block') {
+        fullDesc.style.display = 'none';
+        btn.textContent = 'Подробнее';
+      } else {
+        fullDesc.style.display = 'block';
+        btn.textContent = 'Скрыть';
+      }
+    }
+
+    // По умолчанию
+    window.onload = () => {
+      if (document.querySelector('.faction-item')) {
+        document.querySelector('.faction-item').click();
+      }
+    };
+  </script>
+</body>
+</html>
